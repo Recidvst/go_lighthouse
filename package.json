@@ -1,0 +1,38 @@
+{
+  "name": "go_svelte_lighthouse",
+  "version": "0.0.1",
+  "description": "A lighthouse score tracking tool in Go, with Svelte widgets for displaying the results.",
+  "scripts": {
+    "clean": "rimraf ./dist ./cache",
+    "postinstall": "npx husky install",
+    "release:major": "cross-env changelog -M -a -x chore -t v%npm_package_version% && git add CHANGELOG.md && git commit -m \"chore(release): updated CHANGELOG after major release\" && npm --no-git-tag-version version major",
+    "release:minor": "cross-env changelog -m -a -x chore -t v%npm_package_version% && git add CHANGELOG.md && git commit -m \"chore(release): updated CHANGELOG after minor release\" && npm --no-git-tag-version version minor",
+    "release:patch": "cross-env changelog -p -a -x chore -t v%npm_package_version% && git add CHANGELOG.md && git commit -m \"chore(release): updated CHANGELOG after patch release\" && npm --no-git-tag-version version patch",
+    "postversion": "cross-env git add . && git commit -m \"chore(release): upgrade site version\" && git tag v%npm_package_version% && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recidvst/go_svelte_lighthouse.git"
+  },
+  "author": "Chris Snowden <cdsnowden@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Recidvst/go_svelte_lighthouse/issues"
+  },
+  "homepage": "https://github.com/Recidvst/go_svelte_lighthouse#readme",
+  "main": "index.js",
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "dependencies": {
+    "@commitlint/cli": "^12.1.0",
+    "@commitlint/config-conventional": "^12.0.1",
+    "cross-env": "^7.0.3",
+    "env-cmd": "^10.1.0",
+    "generate-changelog": "^1.8.0",
+    "husky": "^5.2.0",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
+    "rimraf": "^3.0.2"
+  }
+}
