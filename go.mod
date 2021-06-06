@@ -1,4 +1,4 @@
-module go_api/api
+module go_svelte_lighthouse
 
 go 1.16
 
