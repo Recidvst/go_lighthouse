@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	// "math/rand"
 	// "strconv"
+
+	REST "go_svelte_lighthouse/rest"
 )
 
 // Website struct (holds the website)
@@ -43,6 +45,8 @@ type ResultMap struct {
 
 func main() {
 	fmt.Println("API up")
+
+	REST.GetWebsiteStats()
 
 	// Init router
 	r := mux.NewRouter()
