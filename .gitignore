@@ -43,6 +43,9 @@ coverage
 # nyc test coverage
 .nyc_output
 
+# lighthouse json reports
+reports
+
 # node-waf configuration
 .lock-wscript
 
