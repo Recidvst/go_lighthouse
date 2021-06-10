@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	ENV "go_svelte_lighthouse/env"
+	CONFIG "go_svelte_lighthouse/config"
 	REST "go_svelte_lighthouse/rest"
 )
 
@@ -42,10 +42,12 @@ type ResultMap struct {
 	Value        string  `json:"value"`
 }
 
-var environmentType = ENV.GetEnvByKey("ENVIRONMENT")
+var environmentType = CONFIG.GetEnvByKey("ENVIRONMENT")
+var registeredWebsites = CONFIG.GetAllRegisteredWebsites()
 
 func main() {	
 	fmt.Println("API up")
+	fmt.Println(registeredWebsites)
 
 	// Init router
 	r := mux.NewRouter()
