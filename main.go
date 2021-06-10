@@ -8,9 +8,8 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
-	// "math/rand"
-	// "strconv"
 
+	ENV "go_svelte_lighthouse/env"
 	REST "go_svelte_lighthouse/rest"
 )
 
@@ -45,7 +44,9 @@ type ResultMap struct {
 
 var websitesFetched = make(map[string]string)
 
-func main() {
+var environmentType = ENV.GetEnvByKey("ENVIRONMENT")
+
+func main() {	
 	fmt.Println("API up")
 
 	// Init router
@@ -53,7 +54,9 @@ func main() {
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("API hit")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if (environmentType != "production") {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	}).Methods("GET", "OPTIONS")
 
@@ -62,8 +65,10 @@ func main() {
 		fmt.Println("POST received")
 
 		// set headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "application/json")
+		if (environmentType != "production") {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
 
 		// get url param
 		requestedUrl := r.FormValue("url")
@@ -93,7 +98,9 @@ func main() {
 	}).Methods("POST", "OPTIONS")
 
 	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if (environmentType != "production") {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
 		// get request query
 		url := r.URL.Query()
 		fmt.Printf("%+v\n", url)

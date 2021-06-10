@@ -9,7 +9,7 @@ import (
 
 func CreateReport(url string) (outputPath string, err error) {
 	// full url of the website to be checked
-	urlToFetch := "https://www.chris-snowden.me/" // TODO: this needs to be passed by the api after receiving from the user
+	urlToFetch := url
 
 	// remove the protocol and host, to use in outputPath
 	urlSliced := strings.Split(urlToFetch, ".")
