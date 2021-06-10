@@ -1,50 +1,57 @@
-package main // rename to cli after testing
+package cli
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 )
 
-func main() {
-    // full url of the website to be checked
-    urlToFetch := "https://www.chris-snowden.me/" // TODO: this needs to be passed by the api after receiving from the user
+func CreateReport(url string) (outputPath string, err error) {
+	// full url of the website to be checked
+	urlToFetch := "https://www.chris-snowden.me/" // TODO: this needs to be passed by the api after receiving from the user
 
-    // remove the protocol and host, to use in outputPath
-    urlSliced := strings.Split(urlToFetch, ".")
-    urlAsFolder := strings.Join(urlSliced[1:], "_")
+	// remove the protocol and host, to use in outputPath
+	urlSliced := strings.Split(urlToFetch, ".")
+	urlAsFolder := strings.Join(urlSliced[1:], "_")
 
-    // add a trailing slash to the url if it doesn't have one
-    if (string(urlAsFolder[len(urlAsFolder)-1]) != string("/")) {
-        urlAsFolder = urlAsFolder + "/"
-    }
+	// add a trailing slash to the url if it doesn't have one
+	if string(urlAsFolder[len(urlAsFolder)-1]) != string("/") {
+		urlAsFolder = urlAsFolder + "/"
+	}
 
-    // get the date, to use in outputPath
-    currentDate := time.Now()
-    dateAsFilename := currentDate.Format("02012006") // date as DDMMYYYY
+	// get the date, to use in outputPath
+	currentDate := time.Now()
+	dateAsFilename := currentDate.Format("02012006") // date as DDMMYYYY
 
-    // where the json output will be saved
-    outputPath := "../reports/" + urlAsFolder + dateAsFilename + ".json"
-    fmt.Println(outputPath)
+	// where the json output will be saved
+	outputPath = "reports/" + urlAsFolder + dateAsFilename + ".json"
 
-    // check folder exist, if not then create them otherwise cli command will error
-    if _, checkDirErr := os.Stat("../reports/" + urlAsFolder); os.IsNotExist(checkDirErr) {
-        mkdirErr := os.Mkdir("../reports/" + urlAsFolder, 0755)
-        if (mkdirErr != nil) {
-            log.Fatalln(mkdirErr)
-        }   
-    }
+	// check folder exist, if not then create them otherwise cli command will error
+	if _, checkDirErr := os.Stat("reports"); os.IsNotExist(checkDirErr) {
+		mkdirErr := os.Mkdir("reports", 0755)
+		if mkdirErr != nil {
+			err = mkdirErr
+			return outputPath, err
+		}
+		if _, checkDirErr := os.Stat("reports/" + urlAsFolder); os.IsNotExist(checkDirErr) {
+			mkdirErr := os.Mkdir("reports/"+urlAsFolder, 0755)
+			if mkdirErr != nil {
+				err = mkdirErr
+				return outputPath, err
+			}
+		}
+	}
 
-    // build slice of flags to pass to exec
-    flags := []string{urlToFetch, "--output=json", "--output-path=" + outputPath}
-    fmt.Println(flags)
+	// build slice of flags to pass to exec
+	flags := []string{urlToFetch, "--output=json", "--chrome-flags='--headless'", "--output-path=" + outputPath}
 
-    // run cli command
-    cmd := exec.Command("lighthouse", flags...)
-    if err := cmd.Run(); err != nil {
-        log.Fatalln(err)
-    }
+	// run cli command
+	cmd := exec.Command("lighthouse", flags...)
+	if execErr := cmd.Run(); execErr != nil {
+		err = execErr
+		return outputPath, err
+	}
+
+	return outputPath, nil
 }

@@ -1,6 +1,8 @@
 package rest
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func GetWebsiteStats(url string) {
 	fmt.Println("get specific website")

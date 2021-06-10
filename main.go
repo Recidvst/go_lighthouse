@@ -43,20 +43,57 @@ type ResultMap struct {
 	Value        string  `json:"value"`
 }
 
+var websitesFetched = make(map[string]string)
+
 func main() {
 	fmt.Println("API up")
-
-	REST.GetWebsiteStats()
 
 	// Init router
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("API hit")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	}).Methods("GET")
+	}).Methods("GET", "OPTIONS")
+
+	// POST to refetch a website
+	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("POST received")
+
+		// set headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+
+		// get url param
+		requestedUrl := r.FormValue("url")
+
+		var status bool = false
+		var statusErr error
+		var statusPath string
+
+		// fetch website report
+		if len(requestedUrl) > 0 {
+			statusMap := REST.RefetchWebsite(requestedUrl)
+			if !statusMap[requestedUrl].ErrorStatus() {
+				status = true
+				statusPath = statusMap[requestedUrl].GetReportPath()
+			} else {
+				statusErr = statusMap[requestedUrl].GetError()
+			}
+		}
+
+		// send a response depending on error or success
+		if !status {
+			json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
+		} else {
+			json.NewEncoder(w).Encode(map[string]string{"status": "Success", "outputPath": statusPath})
+		}
+
+	}).Methods("POST", "OPTIONS")
 
 	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		// get request query
 		url := r.URL.Query()
 		fmt.Printf("%+v\n", url)
@@ -72,8 +109,8 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "TODO"})
 
 		// fmt.Sprintf("trigger lighthouse for %d", website)
-	}).Methods("GET")
+	}).Methods("GET", "OPTIONS")
 
 	// Start server
-	log.Fatal(http.ListenAndServe(":9999", r))
+	log.Fatalln(http.ListenAndServe(":9999", r))
 }
