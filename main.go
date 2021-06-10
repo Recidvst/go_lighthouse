@@ -42,8 +42,6 @@ type ResultMap struct {
 	Value        string  `json:"value"`
 }
 
-var websitesFetched = make(map[string]string)
-
 var environmentType = ENV.GetEnvByKey("ENVIRONMENT")
 
 func main() {	
@@ -52,15 +50,16 @@ func main() {
 	// Init router
 	r := mux.NewRouter()
 
+	// GET | root endpoint, test if API up
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("API hit")
 		if (environmentType != "production") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	}).Methods("GET", "OPTIONS")
 
-	// POST to refetch a website
+
+	// POST | refetch a specific website
 	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("POST received")
 
