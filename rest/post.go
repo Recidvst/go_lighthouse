@@ -44,7 +44,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 		}
 	}
 
-	output, err := CLI.CreateReport(url)
+	output, err := CLI.CreateReport(url, false)
 	if err != nil {
 		LOGS.WarningLogger.Printf("Failure to fetch a report for %v", url)
 		statusMap[url] = FetchStatus{
@@ -67,4 +67,40 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 
 func RefetchWebsites() {
 	fmt.Println("refetch all websites")
+
+	var allUrls [string] // TODO: grab all urls from manifest file (sites.json)
+
+	if len(allUrls) > 0 {
+
+		statusMap := make(map[string]FetchStatus)
+
+		ch := make(chan FetchStatus)
+		
+		for _, url := range os.Args[1:] {
+
+			// start a goroutine
+			output, err := CLI.CreateReport(url, false)
+
+			if err != nil {
+				LOGS.WarningLogger.Printf("Failure to fetch a report for %v", url)
+				statusMap[url] = FetchStatus{
+					true,
+					err,
+					"Failure to fetch a report for" + url,
+					"",
+				}
+				ch <- statusMap
+			}
+			else {
+				statusMap[url] = FetchStatus{
+					false,
+					nil,
+					"Success",
+					output,
+				}
+				ch <- statusMap
+			}
+		}
+
+	}
 }

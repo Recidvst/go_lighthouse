@@ -98,6 +98,38 @@ func main() {
 
 	}).Methods("POST", "OPTIONS")
 
+	// POST | refetch all tracked websites
+	r.HandleFunc("/websites", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("POST received")
+
+		// set headers
+		w.Header().Set("Content-Type", "application/json")
+		if EnvironmentType != "production" {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+
+		var status bool = false
+		var statusErr error
+		var statusPath string
+
+		// fetch website report
+		statusMap := REST.RefetchWebsites()
+		if !statusMap[requestedUrl].ErrorStatus() {
+			status = true
+			statusPath = statusMap[requestedUrl].GetReportPath()
+		} else {
+			statusErr = statusMap[requestedUrl].GetError()
+		}
+
+		// send a response depending on error or success
+		if !status {
+			json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
+		} else {
+			json.NewEncoder(w).Encode(map[string]string{"status": "Success"})
+		}
+
+	}).Methods("POST", "OPTIONS")
+
 	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
 		if EnvironmentType != "production" {
 			w.Header().Set("Access-Control-Allow-Origin", "*")

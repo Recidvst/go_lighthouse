@@ -50,7 +50,7 @@ Trigger a refetch for all registered websites
 Params:
 
 ```js
-TBC
+n / a
 ```
 
 ### `GET /view/website?url=https://github.com/`

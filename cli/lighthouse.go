@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func CreateReport(url string) (outputPath string, err error) {
+func CreateReport(url string, getDesktop bool) (outputPath string, err error) {
 	// full url of the website to be checked
 	urlToFetch := url
 
@@ -43,8 +43,14 @@ func CreateReport(url string) (outputPath string, err error) {
 		}
 	}
 
+	// handle desktop vs mobile presets
+	var presetFlag string = "--preset=mobile"
+	if getDesktop {
+		presetFlag = "--preset=desktop"
+	}
+
 	// build slice of flags to pass to exec
-	flags := []string{urlToFetch, "--output=json", "--chrome-flags='--headless'", "--output-path=" + outputPath}
+	flags := []string{urlToFetch, "--output=json", "--chrome-flags='--headless'", "--output-path=" + outputPath, presetFlag}
 
 	// run cli command
 	cmd := exec.Command("lighthouse", flags...)

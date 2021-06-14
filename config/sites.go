@@ -2,10 +2,8 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	LOGS "go_svelte_lighthouse/logs"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
