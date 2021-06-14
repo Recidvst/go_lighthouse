@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	LOGS "go_svelte_lighthouse/logs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,8 +11,8 @@ import (
 
 // structs to parse the json data
 type SiteEntry struct {
-	Name string    `json:"name"`
-	Url string    `json:"url"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
 type SiteEntries struct {
 	Sites []*SiteEntry `json:"sites"`
@@ -23,13 +24,13 @@ func GetAllRegisteredWebsites() map[string]interface{} {
 	// get path
 	var cwd, err = os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		LOGS.InfoLogger.Fatalln(err)
 	}
 
 	// open json file
 	jsonFile, err := os.Open(cwd + "/config/sites.json")
 	if err != nil {
-		log.Fatal(err)
+		LOGS.InfoLogger.Fatalln(err)
 	}
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
@@ -42,7 +43,7 @@ func GetAllRegisteredWebsites() map[string]interface{} {
 
 	// unmarshal json into map
 	if err := json.Unmarshal(jsonBytes, &siteEntries); err != nil {
-		fmt.Printf("failed to unmarshal json file, error: %v", err)
+		LOGS.InfoLogger.Fatalf("failed to unmarshal json file, error: %v", err)
 	}
 
 	return siteEntries

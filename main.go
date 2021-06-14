@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 
 	CONFIG "go_svelte_lighthouse/config"
+	LOGS "go_svelte_lighthouse/logs"
 	REST "go_svelte_lighthouse/rest"
 )
 
@@ -42,24 +43,23 @@ type ResultMap struct {
 	Value        string  `json:"value"`
 }
 
-var environmentType = CONFIG.GetEnvByKey("ENVIRONMENT")
-var registeredWebsites = CONFIG.GetAllRegisteredWebsites()
+var EnvironmentType = CONFIG.GetEnvByKey("ENVIRONMENT")
+var RegisteredWebsites = CONFIG.GetAllRegisteredWebsites()
 
-func main() {	
+func main() {
 	fmt.Println("API up")
-	fmt.Println(registeredWebsites)
+	fmt.Println(RegisteredWebsites)
 
 	// Init router
 	r := mux.NewRouter()
 
 	// GET | root endpoint, test if API up
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if (environmentType != "production") {
+		if EnvironmentType != "production" {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	}).Methods("GET", "OPTIONS")
-
 
 	// POST | refetch a specific website
 	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +67,7 @@ func main() {
 
 		// set headers
 		w.Header().Set("Content-Type", "application/json")
-		if (environmentType != "production") {
+		if EnvironmentType != "production" {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 
@@ -99,7 +99,7 @@ func main() {
 	}).Methods("POST", "OPTIONS")
 
 	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
-		if (environmentType != "production") {
+		if EnvironmentType != "production" {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 		// get request query

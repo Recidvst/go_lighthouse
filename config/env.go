@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/viper"
+	LOGS "go_svelte_lighthouse/logs"
 )
 
 // handle global config vars
@@ -13,7 +14,7 @@ func GetEnvByKey(key string) string {
 	viper.SetConfigType("env")
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Errorf("Failed to read config file: %s \n", err)
+		LOGS.InfoLogger.Fatalf("Failed to read config file: %s \n", err)
 		return ""
 	}
 	value := viper.Get(key).(string)
