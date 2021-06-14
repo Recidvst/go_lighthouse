@@ -14,7 +14,7 @@ func GetEnvByKey(key string) string {
 	viper.SetConfigType("env")
 	err := viper.ReadInConfig()
 	if err != nil {
-		LOGS.InfoLogger.Fatalf("Failed to read config file: %s \n", err)
+		LOGS.ErrorLogger.Fatalf("Failed to read config file: %s \n", err)
 		return ""
 	}
 	value := viper.Get(key).(string)

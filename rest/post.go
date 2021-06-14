@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	CLI "go_svelte_lighthouse/cli"
+	LOGS "go_svelte_lighthouse/logs"
 )
 
 // struct for the function return to handle errors and return the created report path
@@ -34,6 +35,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 	statusMap := make(map[string]FetchStatus)
 
 	if len(url) < 1 {
+		LOGS.WarningLogger.Println("Please provide a website URL to fetch")
 		statusMap["nourl"] = FetchStatus{
 			true,
 			errors.New("Please provide a website URL to fetch"),
@@ -44,10 +46,11 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 
 	output, err := CLI.CreateReport(url)
 	if err != nil {
+		LOGS.WarningLogger.Printf("Failure to fetch a report for %v", url)
 		statusMap[url] = FetchStatus{
 			true,
 			err,
-			"Failure",
+			"Failure to fetch a report for" + url,
 			"",
 		}
 	} else {

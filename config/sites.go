@@ -24,13 +24,13 @@ func GetAllRegisteredWebsites() map[string]interface{} {
 	// get path
 	var cwd, err = os.Getwd()
 	if err != nil {
-		LOGS.InfoLogger.Fatalln(err)
+		LOGS.ErrorLogger.Fatalln(err)
 	}
 
 	// open json file
 	jsonFile, err := os.Open(cwd + "/config/sites.json")
 	if err != nil {
-		LOGS.InfoLogger.Fatalln(err)
+		LOGS.ErrorLogger.Fatalln(err)
 	}
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
@@ -43,7 +43,7 @@ func GetAllRegisteredWebsites() map[string]interface{} {
 
 	// unmarshal json into map
 	if err := json.Unmarshal(jsonBytes, &siteEntries); err != nil {
-		LOGS.InfoLogger.Fatalf("failed to unmarshal json file, error: %v", err)
+		LOGS.ErrorLogger.Fatalf("Failed to unmarshal json file, error: %v", err)
 	}
 
 	return siteEntries

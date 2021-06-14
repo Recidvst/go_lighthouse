@@ -6,6 +6,7 @@ import (
 
 func GetWebsiteStats(url string) {
 	fmt.Println("get specific website")
+	fmt.Println(url)
 }
 
 func GetAllWebsitesStats() {
