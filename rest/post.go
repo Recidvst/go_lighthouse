@@ -2,18 +2,32 @@ package rest
 
 import (
 	"errors"
-	"fmt"
 
 	CLI "go_svelte_lighthouse/cli"
+	CONFIG "go_svelte_lighthouse/config"
 	LOGS "go_svelte_lighthouse/logs"
 )
 
-// struct for the function return to handle errors and return the created report path
+// structs for the urls found in the site manifest
+type Sites struct {
+  Sites []Site `json:sites`
+}
+type Site struct {
+  Name string `json:name`
+  URL string `json:url`
+}
+
+// structs for the function return to handle errors and return the created report path
 type FetchStatus struct {
 	DidError   bool
 	Error      error
 	Message    string
 	ReportPath string
+}
+type FetchStatusSlice struct {
+	Statuses   []FetchStatus
+	DidError   bool
+	Error      error
 }
 
 // getters for FetchStatus struct
@@ -28,6 +42,13 @@ func (f FetchStatus) GetMessage() string {
 }
 func (f FetchStatus) GetReportPath() string {
 	return f.ReportPath
+}
+// getters for FetchStatusSlice struct
+func (f FetchStatusSlice) ErrorStatus() bool {
+	return f.DidError
+}
+func (f FetchStatusSlice) GetError() error {
+	return f.Error
 }
 
 func RefetchWebsite(url string) map[string]FetchStatus {
@@ -65,42 +86,52 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 	return statusMap
 }
 
-func RefetchWebsites() {
-	fmt.Println("refetch all websites")
+func RefetchWebsites() []map[string]FetchStatus {
 
-	var allUrls [string] // TODO: grab all urls from manifest file (sites.json)
+	// fn returns a slice of maps
+	var statusMapSlice []map[string]FetchStatus
+
+	// grab all urls from manifest file (sites.json)
+	allUrls := CONFIG.GetAllRegisteredWebsites()
 
 	if len(allUrls) > 0 {
 
-		statusMap := make(map[string]FetchStatus)
+		// loops to get the map interfaces for the sites
+		for _, site := range allUrls {
+			sitesSlice := site.([]interface{})
 
-		ch := make(chan FetchStatus)
-		
-		for _, url := range os.Args[1:] {
+			for _, siteMap := range sitesSlice {
+				siteURLMap := siteMap.(map[string]interface {})
+				siteURL := siteURLMap["url"].(string)
 
-			// start a goroutine
-			output, err := CLI.CreateReport(url, false)
-
-			if err != nil {
-				LOGS.WarningLogger.Printf("Failure to fetch a report for %v", url)
-				statusMap[url] = FetchStatus{
-					true,
-					err,
-					"Failure to fetch a report for" + url,
-					"",
+				// make a status map to be returned
+				statusMap := make(map[string]FetchStatus)
+	
+				output, err := CLI.CreateReport(siteURL, false)
+	
+				if err != nil {
+					LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
+					statusMap[siteURL] = FetchStatus{
+						true,
+						err,
+						"Failure to fetch a report for" + siteURL,
+						"",
+					}
+				} else {
+					statusMap[siteURL] = FetchStatus{
+						false,
+						nil,
+						"Success",
+						output,
+					}
 				}
-				ch <- statusMap
+
+				statusMapSlice = append(statusMapSlice, statusMap)
 			}
-			else {
-				statusMap[url] = FetchStatus{
-					false,
-					nil,
-					"Success",
-					output,
-				}
-				ch <- statusMap
-			}
+			
 		}
 
 	}
+
+	return statusMapSlice
 }

@@ -1,16 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"encoding/json"
 
 	"github.com/gorilla/mux"
 
 	CONFIG "go_svelte_lighthouse/config"
-	LOGS "go_svelte_lighthouse/logs"
 	REST "go_svelte_lighthouse/rest"
 )
 
@@ -110,23 +111,23 @@ func main() {
 
 		var status bool = false
 		var statusErr error
-		var statusPath string
 
 		// fetch website report
-		statusMap := REST.RefetchWebsites()
-		if !statusMap[requestedUrl].ErrorStatus() {
-			status = true
-			statusPath = statusMap[requestedUrl].GetReportPath()
+		var statusMap = REST.RefetchWebsites()
+
+		if len(statusMap) < 1 {
+			statusErr = errors.New("Failed to refetch any websites")
 		} else {
-			statusErr = statusMap[requestedUrl].GetError()
+			status = true
 		}
 
 		// send a response depending on error or success
 		if !status {
 			json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
 		} else {
-			json.NewEncoder(w).Encode(map[string]string{"status": "Success"})
+			json.NewEncoder(w).Encode(map[string]string{"status": "Success", "number-of-reports-generated": strconv.Itoa(len(statusMap))})
 		}
+		fmt.Println("fn complete")
 
 	}).Methods("POST", "OPTIONS")
 

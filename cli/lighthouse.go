@@ -1,50 +1,54 @@
 package cli
 
 import (
+	"log"
+	"net/url"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 )
 
-func CreateReport(url string, getDesktop bool) (outputPath string, err error) {
+func CreateReport(urlArg string, getDesktop bool) (outputPath string, err error) {
 	// full url of the website to be checked
-	urlToFetch := url
+	urlToFetch := urlArg
 
-	// remove the protocol and host, to use in outputPath
-	urlSliced := strings.Split(urlToFetch, ".")
-	urlAsFolder := strings.Join(urlSliced[1:], "_")
+	var urlAsFolder string
 
-	// add a trailing slash to the url if it doesn't have one
-	if string(urlAsFolder[len(urlAsFolder)-1]) != string("/") {
-		urlAsFolder = urlAsFolder + "/"
+	// strip protocol, args etc. from the url
+	parsedURL, err := url.Parse(urlToFetch)
+	if err != nil {
+		log.Fatal(err)
 	}
+	urlAsFolder = parsedURL.Host;
 
 	// get the date, to use in outputPath
 	currentDate := time.Now()
 	dateAsFilename := currentDate.Format("02012006") // date as DDMMYYYY
+	
+	// get current working directory
+	var cwd, _ = os.Getwd()
 
 	// where the json output will be saved
-	outputPath = "reports/" + urlAsFolder + dateAsFilename + ".json"
+	outputPath = cwd + "/reports/" + urlAsFolder + "/" + dateAsFilename + ".json"
 
-	// check folder exist, if not then create them otherwise cli command will error
-	if _, checkDirErr := os.Stat("reports"); os.IsNotExist(checkDirErr) {
-		mkdirErr := os.Mkdir("reports", 0755)
+	// check folders exist, if not then create them otherwise cli command will error
+	if _, checkDirErr := os.Stat(cwd + "/reports"); os.IsNotExist(checkDirErr) {
+		mkdirErr := os.Mkdir(cwd + "/reports", 0755)
 		if mkdirErr != nil {
 			err = mkdirErr
 			return outputPath, err
 		}
-		if _, checkDirErr := os.Stat("reports/" + urlAsFolder); os.IsNotExist(checkDirErr) {
-			mkdirErr := os.Mkdir("reports/"+urlAsFolder, 0755)
-			if mkdirErr != nil {
-				err = mkdirErr
-				return outputPath, err
-			}
+	}
+	if _, checkDirErr := os.Stat(cwd + "/reports/" + urlAsFolder); os.IsNotExist(checkDirErr) {
+		mkdirErr := os.Mkdir(cwd + "/reports/"+ urlAsFolder, 0755)
+		if mkdirErr != nil {
+			err = mkdirErr
+			return outputPath, err
 		}
 	}
 
 	// handle desktop vs mobile presets
-	var presetFlag string = "--preset=mobile"
+	var presetFlag string = ""
 	if getDesktop {
 		presetFlag = "--preset=desktop"
 	}
