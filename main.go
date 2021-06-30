@@ -127,7 +127,6 @@ func main() {
 		} else {
 			json.NewEncoder(w).Encode(map[string]string{"status": "Success", "number-of-reports-generated": strconv.Itoa(len(statusMap))})
 		}
-		fmt.Println("fn complete")
 
 	}).Methods("POST", "OPTIONS")
 

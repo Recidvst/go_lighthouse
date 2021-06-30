@@ -2,6 +2,9 @@ package rest
 
 import (
 	"errors"
+	"fmt"
+	"sync"
+	"time"
 
 	CLI "go_svelte_lighthouse/cli"
 	CONFIG "go_svelte_lighthouse/config"
@@ -87,6 +90,8 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 }
 
 func RefetchWebsites() []map[string]FetchStatus {
+	
+	var wg sync.WaitGroup
 
 	// fn returns a slice of maps
 	var statusMapSlice []map[string]FetchStatus
@@ -100,36 +105,44 @@ func RefetchWebsites() []map[string]FetchStatus {
 		for _, site := range allUrls {
 			sitesSlice := site.([]interface{})
 
-			for _, siteMap := range sitesSlice {
-				siteURLMap := siteMap.(map[string]interface {})
-				siteURL := siteURLMap["url"].(string)
+				for _, siteMap := range sitesSlice {
+					siteURLMap := siteMap.(map[string]interface {})
+					siteURL := siteURLMap["url"].(string)
+	
+					// make a status map to be returned
+					statusMap := make(map[string]FetchStatus)
+	
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						output, err := CLI.CreateReport(siteURL, false)
 
-				// make a status map to be returned
-				statusMap := make(map[string]FetchStatus)
+						fmt.Printf("Site %s fetched at %s", siteURL, time.Now())
+			
+						if err != nil {
+							LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
+							statusMap[siteURL] = FetchStatus{
+								true,
+								err,
+								"Failure to fetch a report for" + siteURL,
+								"",
+							}
+						} else {
+							statusMap[siteURL] = FetchStatus{
+								false,
+								nil,
+								"Success",
+								output,
+							}
+						}
+					}()
 	
-				output, err := CLI.CreateReport(siteURL, false)
-	
-				if err != nil {
-					LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
-					statusMap[siteURL] = FetchStatus{
-						true,
-						err,
-						"Failure to fetch a report for" + siteURL,
-						"",
-					}
-				} else {
-					statusMap[siteURL] = FetchStatus{
-						false,
-						nil,
-						"Success",
-						output,
-					}
+					statusMapSlice = append(statusMapSlice, statusMap)
 				}
-
-				statusMapSlice = append(statusMapSlice, statusMap)
-			}
 			
 		}
+
+		wg.Wait()
 
 	}
 
