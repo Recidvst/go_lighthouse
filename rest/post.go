@@ -2,7 +2,6 @@ package rest
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -32,6 +31,7 @@ type FetchStatusSlice struct {
 	Statuses []FetchStatus
 	DidError bool
 	Error    error
+	FullDuration	float64
 }
 
 // getters for FetchStatus struct
@@ -106,6 +106,9 @@ func RefetchWebsites() []map[string]FetchStatus {
 	// fn returns a slice of maps
 	var statusMapSlice []map[string]FetchStatus
 
+	// track time taken to fetch all sites
+	startTime := time.Now()
+
 	// grab all urls from manifest file (sites.json)
 	allUrls := CONFIG.GetAllRegisteredWebsites()
 
@@ -123,12 +126,12 @@ func RefetchWebsites() []map[string]FetchStatus {
 				statusMap := make(map[string]FetchStatus)
 
 				wg.Add(1)
+
 				reportStart := time.Now()
+
 				go func() {
 					defer wg.Done()
 					output, err := CLI.CreateReport(siteURL, false)
-
-					fmt.Printf("Site %s fetched at %s", siteURL, time.Now())
 
 					if err != nil {
 						LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
@@ -150,16 +153,25 @@ func RefetchWebsites() []map[string]FetchStatus {
 					}
 
 					statusMapSlice = append(statusMapSlice, statusMap)
-					fmt.Println(time.Since(reportStart))
+					
 				}()
-
-				statusMapSlice = append(statusMapSlice, statusMap)
 
 			}
 
 		}
 
 		wg.Wait()
+		// send total time back to main
+		finalTime := time.Since(startTime)
+		timeStatusMap := make(map[string]FetchStatus)
+		timeStatusMap["meta"] = FetchStatus{
+			false,
+			nil,
+			"Success",
+			"",
+			finalTime,
+		}
+		statusMapSlice = append(statusMapSlice, timeStatusMap)
 
 	}
 

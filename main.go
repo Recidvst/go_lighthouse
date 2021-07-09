@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 
 	CONFIG "go_svelte_lighthouse/config"
+	"go_svelte_lighthouse/rest"
 	REST "go_svelte_lighthouse/rest"
 )
 
@@ -97,15 +98,24 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 	var statusErr error
 
 	// fetch website report
-	var statusMap = REST.RefetchWebsites()
+	var statusMapsCollection = REST.RefetchWebsites()
 
-	if len(statusMap) < 1 {
+	if len(statusMapsCollection) < 1 {
 		statusErr = errors.New("Failed to refetch any websites")
 	} else {
 		status = true
 	}
 
-	fmt.Println(statusMap)
+
+	// get meta map from collection
+	var metaMap rest.FetchStatus
+	var timeToGenerate int64
+	for m := 0; m < len(statusMapsCollection); m++ {
+		if val, ok := statusMapsCollection[m]["meta"]; ok {
+			metaMap = val
+			timeToGenerate = metaMap.GetDuration().Milliseconds()
+		}
+	}
 
 	// send a response depending on error or success
 	if !status {
@@ -113,8 +123,8 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status": "Success", 
-			"number_of_reports_generated": strconv.Itoa(len(statusMap)),
-			// "time_to_generate": strconv.Itoa(statusMap.GetDuration()),
+			"number_of_reports_generated": strconv.Itoa(len(statusMapsCollection)),
+			"time_to_generate": strconv.FormatInt(timeToGenerate, 10) + "ms",
 		})
 	}	
 }
