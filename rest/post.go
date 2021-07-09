@@ -13,11 +13,11 @@ import (
 
 // structs for the urls found in the site manifest
 type Sites struct {
-  Sites []Site `json:sites`
+	Sites []Site `json:sites`
 }
 type Site struct {
-  Name string `json:name`
-  URL string `json:url`
+	Name string `json:name`
+	URL  string `json:url`
 }
 
 // structs for the function return to handle errors and return the created report path
@@ -26,11 +26,12 @@ type FetchStatus struct {
 	Error      error
 	Message    string
 	ReportPath string
+	Duration   time.Duration
 }
 type FetchStatusSlice struct {
-	Statuses   []FetchStatus
-	DidError   bool
-	Error      error
+	Statuses []FetchStatus
+	DidError bool
+	Error    error
 }
 
 // getters for FetchStatus struct
@@ -46,6 +47,10 @@ func (f FetchStatus) GetMessage() string {
 func (f FetchStatus) GetReportPath() string {
 	return f.ReportPath
 }
+func (f FetchStatus) GetDuration() time.Duration {
+	return f.Duration
+}
+
 // getters for FetchStatusSlice struct
 func (f FetchStatusSlice) ErrorStatus() bool {
 	return f.DidError
@@ -58,6 +63,8 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
 
+	reportStart := time.Now()
+
 	if len(url) < 1 {
 		LOGS.WarningLogger.Println("Please provide a website URL to fetch")
 		statusMap["nourl"] = FetchStatus{
@@ -65,6 +72,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 			errors.New("Please provide a website URL to fetch"),
 			"Failure",
 			"",
+			time.Since(reportStart),
 		}
 	}
 
@@ -76,6 +84,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 			err,
 			"Failure to fetch a report for" + url,
 			"",
+			time.Since(reportStart),
 		}
 	} else {
 		statusMap[url] = FetchStatus{
@@ -83,6 +92,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 			nil,
 			"Success",
 			output,
+			time.Since(reportStart),
 		}
 	}
 
@@ -90,7 +100,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 }
 
 func RefetchWebsites() []map[string]FetchStatus {
-	
+
 	var wg sync.WaitGroup
 
 	// fn returns a slice of maps
@@ -105,41 +115,48 @@ func RefetchWebsites() []map[string]FetchStatus {
 		for _, site := range allUrls {
 			sitesSlice := site.([]interface{})
 
-				for _, siteMap := range sitesSlice {
-					siteURLMap := siteMap.(map[string]interface {})
-					siteURL := siteURLMap["url"].(string)
-	
-					// make a status map to be returned
-					statusMap := make(map[string]FetchStatus)
-	
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
-						output, err := CLI.CreateReport(siteURL, false)
+			for _, siteMap := range sitesSlice {
+				siteURLMap := siteMap.(map[string]interface{})
+				siteURL := siteURLMap["url"].(string)
 
-						fmt.Printf("Site %s fetched at %s", siteURL, time.Now())
-			
-						if err != nil {
-							LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
-							statusMap[siteURL] = FetchStatus{
-								true,
-								err,
-								"Failure to fetch a report for" + siteURL,
-								"",
-							}
-						} else {
-							statusMap[siteURL] = FetchStatus{
-								false,
-								nil,
-								"Success",
-								output,
-							}
+				// make a status map to be returned
+				statusMap := make(map[string]FetchStatus)
+
+				wg.Add(1)
+				reportStart := time.Now()
+				go func() {
+					defer wg.Done()
+					output, err := CLI.CreateReport(siteURL, false)
+
+					fmt.Printf("Site %s fetched at %s", siteURL, time.Now())
+
+					if err != nil {
+						LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
+						statusMap[siteURL] = FetchStatus{
+							true,
+							err,
+							"Failure to fetch a report for" + siteURL,
+							"",
+							time.Since(reportStart),
 						}
-					}()
-	
+					} else {
+						statusMap[siteURL] = FetchStatus{
+							false,
+							nil,
+							"Success",
+							output,
+							time.Since(reportStart),
+						}
+					}
+
 					statusMapSlice = append(statusMapSlice, statusMap)
-				}
-			
+					fmt.Println(time.Since(reportStart))
+				}()
+
+				statusMapSlice = append(statusMapSlice, statusMap)
+
+			}
+
 		}
 
 		wg.Wait()

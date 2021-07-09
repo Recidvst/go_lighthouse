@@ -47,9 +47,115 @@ type ResultMap struct {
 var EnvironmentType = CONFIG.GetEnvByKey("ENVIRONMENT")
 var RegisteredWebsites = CONFIG.GetAllRegisteredWebsites()
 
+// POST | refetch a specific website
+func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("POST received")
+
+	// set headers
+	w.Header().Set("Content-Type", "application/json")
+	if EnvironmentType != "production" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+
+	// get url param
+	requestedUrl := r.FormValue("url")
+
+	var status bool = false
+	var statusErr error
+	var statusPath string
+
+	// fetch website report
+	if len(requestedUrl) > 0 {
+		statusMap := REST.RefetchWebsite(requestedUrl)
+		if !statusMap[requestedUrl].ErrorStatus() {
+			status = true
+			statusPath = statusMap[requestedUrl].GetReportPath()
+		} else {
+			statusErr = statusMap[requestedUrl].GetError()
+		}
+	}
+
+	// send a response depending on error or success
+	if !status {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
+	} else {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Success", "outputPath": statusPath})
+	}
+}
+
+// POST | refetch all tracked websites
+func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("POST received")
+
+	// set headers
+	w.Header().Set("Content-Type", "application/json")
+	if EnvironmentType != "production" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+
+	var status bool = false
+	var statusErr error
+
+	// fetch website report
+	var statusMap = REST.RefetchWebsites()
+
+	if len(statusMap) < 1 {
+		statusErr = errors.New("Failed to refetch any websites")
+	} else {
+		status = true
+	}
+
+	fmt.Println(statusMap)
+
+	// send a response depending on error or success
+	if !status {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
+	} else {
+		json.NewEncoder(w).Encode(map[string]string{
+			"status": "Success", 
+			"number_of_reports_generated": strconv.Itoa(len(statusMap)),
+			// "time_to_generate": strconv.Itoa(statusMap.GetDuration()),
+		})
+	}	
+}
+
+// GET | get details for specific website
+func getSingleWebsite(w http.ResponseWriter, r *http.Request) {
+	if EnvironmentType != "production" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	// get request query
+	url := r.URL.Query()
+	// get requested site name
+	var urlToTarget string
+	urlToTarget = url.Get("url")
+	fmt.Println(urlToTarget)
+	// return if no website passed
+	if len(urlToTarget) < 1 {
+		json.NewEncoder(w).Encode(map[string]string{"status": "something went wrong"})
+	}
+	// TODO
+	json.NewEncoder(w).Encode(map[string]string{"status": "TODO"})
+}
+
+// GET | get details for all tracked websites
+func getAllWebsites(w http.ResponseWriter, r *http.Request) {
+	if EnvironmentType != "production" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	// TODO
+}
+
+// GET | view details for specific website in a browser, via html template
+func viewSingleWebsite(w http.ResponseWriter, r *http.Request) {
+	if EnvironmentType != "production" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	// TODO
+}
+
 func main() {
 	fmt.Println("API up")
-	fmt.Println(RegisteredWebsites)
 
 	// Init router
 	r := mux.NewRouter()
@@ -62,94 +168,22 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	}).Methods("GET", "OPTIONS")
 
+	// ENDPOINTS -------------------------------------------------------------- //
+
 	// POST | refetch a specific website
-	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("POST received")
-
-		// set headers
-		w.Header().Set("Content-Type", "application/json")
-		if EnvironmentType != "production" {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
-
-		// get url param
-		requestedUrl := r.FormValue("url")
-
-		var status bool = false
-		var statusErr error
-		var statusPath string
-
-		// fetch website report
-		if len(requestedUrl) > 0 {
-			statusMap := REST.RefetchWebsite(requestedUrl)
-			if !statusMap[requestedUrl].ErrorStatus() {
-				status = true
-				statusPath = statusMap[requestedUrl].GetReportPath()
-			} else {
-				statusErr = statusMap[requestedUrl].GetError()
-			}
-		}
-
-		// send a response depending on error or success
-		if !status {
-			json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
-		} else {
-			json.NewEncoder(w).Encode(map[string]string{"status": "Success", "outputPath": statusPath})
-		}
-
-	}).Methods("POST", "OPTIONS")
+	r.HandleFunc("/website", fetchSingleWebsite).Methods("POST", "OPTIONS")
 
 	// POST | refetch all tracked websites
-	r.HandleFunc("/websites", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("POST received")
+	r.HandleFunc("/websites", fetchAllWebsites).Methods("POST", "OPTIONS")
 
-		// set headers
-		w.Header().Set("Content-Type", "application/json")
-		if EnvironmentType != "production" {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
+	// GET | get details for specific website
+	r.HandleFunc("/website", getSingleWebsite).Methods("GET", "OPTIONS")
 
-		var status bool = false
-		var statusErr error
+	// GET | get details for all tracked websites
+	r.HandleFunc("/websites", getAllWebsites).Methods("GET", "OPTIONS")
 
-		// fetch website report
-		var statusMap = REST.RefetchWebsites()
-
-		if len(statusMap) < 1 {
-			statusErr = errors.New("Failed to refetch any websites")
-		} else {
-			status = true
-		}
-
-		// send a response depending on error or success
-		if !status {
-			json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
-		} else {
-			json.NewEncoder(w).Encode(map[string]string{"status": "Success", "number-of-reports-generated": strconv.Itoa(len(statusMap))})
-		}
-
-	}).Methods("POST", "OPTIONS")
-
-	r.HandleFunc("/website", func(w http.ResponseWriter, r *http.Request) {
-		if EnvironmentType != "production" {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
-		// get request query
-		url := r.URL.Query()
-		fmt.Printf("%+v\n", url)
-		// get requested site name
-		var urlToTarget string
-		urlToTarget = url.Get("url")
-		fmt.Println(urlToTarget)
-		// return if no website passed
-		if len(urlToTarget) < 1 {
-			json.NewEncoder(w).Encode(map[string]string{"status": "something went wrong"})
-		}
-
-		json.NewEncoder(w).Encode(map[string]string{"status": "TODO"})
-
-		// fmt.Sprintf("trigger lighthouse for %d", website)
-	}).Methods("GET", "OPTIONS")
+	// GET | view details for specific website in a browser, via html template
+	r.HandleFunc("/website", viewSingleWebsite).Methods("GET", "OPTIONS")
 
 	// Start server
 	log.Fatalln(http.ListenAndServe(":9999", r))
