@@ -105,6 +105,14 @@ func insertDatabaseRow(sitename string, record string) (bool, error) {
 	}
 }
 
+// func updateRecordRow(record_id int, newrecord) (bool, error) {}
+
+// func updateSiteRow(site_id int, newname string) (bool, error) {}
+
+// func removeRecordRow(record_id int) (bool, error) {}
+
+// func removeSiteRow(site_id int) (bool, error) {}
+
 // init fn to create db tables
 func init() {
 	createDB("sqlite__siteresults.db")
