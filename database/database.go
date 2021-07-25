@@ -10,6 +10,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const DB_NAME string = "sqlite__siteresults.db"
+
 func createDB(name string) (bool, error) {
 	
 	// mutex lock
@@ -18,7 +20,7 @@ func createDB(name string) (bool, error) {
 	var cwd, _ = os.Getwd()
 
 	// init database driver
-	database, err := sql.Open("sqlite3", cwd + "/database/" + name)
+	database, err := sql.Open("sqlite3", cwd + "/database/" + DB_NAME)
 	defer database.Close()
 
 	if err != nil {
@@ -74,7 +76,7 @@ func insertDatabaseRow(sitename string, record string) (bool, error) {
 	var cwd, _ = os.Getwd()
 
 	// init database driver
-	database, err := sql.Open("sqlite3", cwd + "/database/" + name)
+	database, err := sql.Open("sqlite3", cwd + "/database/" + DB_NAME)
 	defer database.Close()
 
 	if err != nil {
@@ -115,5 +117,5 @@ func insertDatabaseRow(sitename string, record string) (bool, error) {
 
 // init fn to create db tables
 func init() {
-	createDB("sqlite__siteresults.db")
+	createDB(DB_NAME)
 }

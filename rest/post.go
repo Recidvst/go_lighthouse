@@ -101,7 +101,11 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 
 func RefetchWebsites() []map[string]FetchStatus {
 
+	// waitgroup to handle goroutines concurrent dispatch
 	var wg sync.WaitGroup
+
+	// counting semaphore to limit goroutines to 20
+	var semaphoreTokens = make(chan struct{}, 20)
 
 	// fn returns a slice of maps
 	var statusMapSlice []map[string]FetchStatus
@@ -125,12 +129,24 @@ func RefetchWebsites() []map[string]FetchStatus {
 				// make a status map to be returned
 				statusMap := make(map[string]FetchStatus)
 
+				// get semaphore token
+				semaphoreTokens <- struct{}{}
+
+				// add to waitgroup
 				wg.Add(1)
 
+				// start timer
 				reportStart := time.Now()
 
 				go func() {
+
+					// release semaphore token
+					defer func() { 
+						<- semaphoreTokens
+					}()
+
 					defer wg.Done()
+
 					output, err := CLI.CreateReport(siteURL, false)
 
 					if err != nil {
