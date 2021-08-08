@@ -1,7 +1,6 @@
 package logs
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -16,16 +15,15 @@ func init() {
 	
 	var cwd, _ = os.Getwd()
 
-	// check folders exist, if not then create them otherwise cli command will error
-	_, checkDirErr := os.Stat(cwd + "/logs/logfiles"); os.IsNotExist(checkDirErr)
-	fmt.Println("======================")
-	mkdirErr := os.Mkdir(cwd + "/logs/logfiles", 0755)
-	if mkdirErr != nil {
+	// check folder exists, if not then create them otherwise cli command will error
+	_, checkDirErr := os.Stat(cwd + "/logs"); os.IsNotExist(checkDirErr)
+	if checkDirErr != nil {
+		mkdirErr := os.Mkdir(cwd + "/logs", 0755)
 		log.Printf("Error: failed to create log folder with error: : %s", mkdirErr)
 	}
 
 	// if the log file doesn't exist, create it or append to the file
-	file, makeFileErr := os.OpenFile(cwd + "/logs/logfiles/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	file, makeFileErr := os.OpenFile(cwd + "/logs/logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if makeFileErr != nil {
 		log.Printf("Error: failed to create log file with error: : %s", makeFileErr)
 	}

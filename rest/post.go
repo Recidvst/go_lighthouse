@@ -95,7 +95,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 	return statusMap
 }
 
-func RefetchWebsites() []map[string]FetchStatus {
+func RefetchWebsites(cb func()) []map[string]FetchStatus {
 
 	// waitgroup to handle goroutines concurrent dispatch
 	var wg sync.WaitGroup
@@ -116,9 +116,7 @@ func RefetchWebsites() []map[string]FetchStatus {
 		LOGS.ErrorLogger.Println("Failure to fetch a list of available sites")
 	}
 
-	for _, val := range sitesSlice {
-		allUrls = append(allUrls, val)
-	}
+	allUrls = append(allUrls, sitesSlice...)
 
 	// allUrls = CONFIG.GetAllRegisteredWebsites()
 
@@ -188,6 +186,8 @@ func RefetchWebsites() []map[string]FetchStatus {
 		statusMapSlice = append(statusMapSlice, timeStatusMap)
 
 	}
-
+	
+	// trigger optional callback
+	cb()
 	return statusMapSlice
 }

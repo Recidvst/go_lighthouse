@@ -14,6 +14,9 @@ import (
 	CONFIG "go_svelte_lighthouse/config"
 	"go_svelte_lighthouse/rest"
 	REST "go_svelte_lighthouse/rest"
+
+	// import cron although we don't fire it manually
+	_ "go_svelte_lighthouse/cron"
 )
 
 // Website struct (holds the website)
@@ -98,10 +101,10 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 	var statusErr error
 
 	// fetch website report
-	var statusMapsCollection = REST.RefetchWebsites()
+	var statusMapsCollection = REST.RefetchWebsites(func(){})
 
 	if len(statusMapsCollection) < 1 {
-		statusErr = errors.New("Failed to refetch any websites")
+		statusErr = errors.New("failed to refetch any websites")
 	} else {
 		status = true
 	}

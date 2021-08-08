@@ -8,6 +8,8 @@ import (
 )
 
 func CreateReport(urlArg string, getDesktop bool) (success bool, err error) {
+	
+	fmt.Println("CreateReport")
 	// full url of the website to be checked
 	urlToFetch := urlArg
 
