@@ -1,14 +1,13 @@
 package cli
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"os"
-	"os/exec"
-	"time"
 )
 
-func CreateReport(urlArg string, getDesktop bool) (outputPath string, err error) {
+func CreateReport(urlArg string, getDesktop bool) (success bool, err error) {
 	// full url of the website to be checked
 	urlToFetch := urlArg
 
@@ -19,31 +18,28 @@ func CreateReport(urlArg string, getDesktop bool) (outputPath string, err error)
 	if err != nil {
 		log.Fatal(err)
 	}
-	urlAsFolder = parsedURL.Host;
+	urlAsFolder = parsedURL.Host
 
 	// get the date, to use in outputPath
-	currentDate := time.Now()
-	dateAsFilename := currentDate.Format("02012006") // date as DDMMYYYY
-	
+	// currentDate := time.Now()
+	// dateAsFilename := currentDate.Format("02012006") // date as DDMMYYYY
+
 	// get current working directory
 	var cwd, _ = os.Getwd()
 
-	// where the json output will be saved
-	outputPath = cwd + "/reports/" + urlAsFolder + "/" + dateAsFilename + ".json"
-
 	// check folders exist, if not then create them otherwise cli command will error
 	if _, checkDirErr := os.Stat(cwd + "/reports"); os.IsNotExist(checkDirErr) {
-		mkdirErr := os.Mkdir(cwd + "/reports", 0755)
+		mkdirErr := os.Mkdir(cwd+"/reports", 0755)
 		if mkdirErr != nil {
 			err = mkdirErr
-			return outputPath, err
+			return false, err
 		}
 	}
 	if _, checkDirErr := os.Stat(cwd + "/reports/" + urlAsFolder); os.IsNotExist(checkDirErr) {
-		mkdirErr := os.Mkdir(cwd + "/reports/"+ urlAsFolder, 0755)
+		mkdirErr := os.Mkdir(cwd+"/reports/"+urlAsFolder, 0755)
 		if mkdirErr != nil {
 			err = mkdirErr
-			return outputPath, err
+			return false, err
 		}
 	}
 
@@ -54,14 +50,46 @@ func CreateReport(urlArg string, getDesktop bool) (outputPath string, err error)
 	}
 
 	// build slice of flags to pass to exec
-	flags := []string{urlToFetch, "--output=json", "--chrome-flags='--headless'", "--output-path=" + outputPath, presetFlag}
+	flags := []string{urlToFetch, "--output=json", "-quiet", "--chrome-flags='--headless'", "--output-path=stdout", presetFlag}
+	fmt.Println(flags)
 
 	// run cli command
-	cmd := exec.Command("lighthouse", flags...)
-	if execErr := cmd.Run(); execErr != nil {
-		err = execErr
-		return outputPath, err
-	}
+	// c, b := exec.Command("lighthouse", flags...), new(strings.Builder)
+	// c.Stdout = b
+	// c.Run()
 
-	return outputPath, nil
+	// get stdout as string var
+	// var stdoutString = b.String()
+	// fmt.Println(stdoutString)
+
+	// capturing stdout
+	// stdoutReader, execErr := cmd.StdoutPipe()
+
+	// if execErr != nil {
+	// 	log.Fatal(execErr)
+	// 	return false, execErr
+	// }
+
+	// scanner := bufio.NewScanner(stdoutReader)
+	// go func() {
+	// 	for scanner.Scan() {
+	// 		fmt.Printf("\t > %s\n", scanner.Text())
+	// 	}
+	// }()
+
+	// err = cmd.Start()
+	// if err != nil {
+	// 	fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+	// 	return false, err
+	// }
+
+	// err = cmd.Wait()
+	// if err != nil {
+	// 	fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
+	// 	return false, err
+	// }
+
+	// TODO: now inject into Database
+
+	return true, nil
 }

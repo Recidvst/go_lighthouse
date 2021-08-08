@@ -6,7 +6,8 @@ import (
 	"time"
 
 	CLI "go_svelte_lighthouse/cli"
-	CONFIG "go_svelte_lighthouse/config"
+	// CONFIG "go_svelte_lighthouse/config"
+	DATABASE "go_svelte_lighthouse/database"
 	LOGS "go_svelte_lighthouse/logs"
 )
 
@@ -24,7 +25,6 @@ type FetchStatus struct {
 	DidError   bool
 	Error      error
 	Message    string
-	ReportPath string
 	Duration   time.Duration
 }
 type FetchStatusSlice struct {
@@ -43,9 +43,6 @@ func (f FetchStatus) GetError() error {
 }
 func (f FetchStatus) GetMessage() string {
 	return f.Message
-}
-func (f FetchStatus) GetReportPath() string {
-	return f.ReportPath
 }
 func (f FetchStatus) GetDuration() time.Duration {
 	return f.Duration
@@ -66,32 +63,31 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 	reportStart := time.Now()
 
 	if len(url) < 1 {
-		LOGS.WarningLogger.Println("Please provide a website URL to fetch")
+		LOGS.DebugLogger.Println("Attempted to fetch a website without providing a URL")
 		statusMap["nourl"] = FetchStatus{
-			true,
-			errors.New("Please provide a website URL to fetch"),
+			true, // true = did error
+			errors.New("please provide a website URL to fetch"),
 			"Failure",
-			"",
 			time.Since(reportStart),
 		}
 	}
 
-	output, err := CLI.CreateReport(url, false)
+	ok, err := CLI.CreateReport(url, false)
+
 	if err != nil {
-		LOGS.WarningLogger.Printf("Failure to fetch a report for %v", url)
+		LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", url)
 		statusMap[url] = FetchStatus{
-			true,
+			!ok,
 			err,
 			"Failure to fetch a report for" + url,
-			"",
 			time.Since(reportStart),
 		}
 	} else {
+		LOGS.InfoLogger.Printf("Successfully fetched a report for %v", url)
 		statusMap[url] = FetchStatus{
-			false,
+			!ok,
 			nil,
 			"Success",
-			output,
 			time.Since(reportStart),
 		}
 	}
@@ -113,66 +109,69 @@ func RefetchWebsites() []map[string]FetchStatus {
 	// track time taken to fetch all sites
 	startTime := time.Now()
 
-	// grab all urls from manifest file (sites.json)
-	allUrls := CONFIG.GetAllRegisteredWebsites()
+	// grab all available sites and their urls from manifest file (sites.json)
+	var allUrls []map[string]string
+	sitesSlice, err := DATABASE.ReturnSiteList();
+	if err != nil {
+		LOGS.ErrorLogger.Println("Failure to fetch a list of available sites")
+	}
+
+	for _, val := range sitesSlice {
+		allUrls = append(allUrls, val)
+	}
+
+	// allUrls = CONFIG.GetAllRegisteredWebsites()
 
 	if len(allUrls) > 0 {
 
 		// loops to get the map interfaces for the sites
-		for _, site := range allUrls {
-			sitesSlice := site.([]interface{})
+		for _, siteMap := range allUrls {
+			siteURL := siteMap["url"]
 
-			for _, siteMap := range sitesSlice {
-				siteURLMap := siteMap.(map[string]interface{})
-				siteURL := siteURLMap["url"].(string)
+			// make a status map to be returned
+			statusMap := make(map[string]FetchStatus)
 
-				// make a status map to be returned
-				statusMap := make(map[string]FetchStatus)
+			// get semaphore token
+			semaphoreTokens <- struct{}{}
 
-				// get semaphore token
-				semaphoreTokens <- struct{}{}
+			// add to waitgroup
+			wg.Add(1)
 
-				// add to waitgroup
-				wg.Add(1)
+			// start timer
+			reportStart := time.Now()
 
-				// start timer
-				reportStart := time.Now()
+			go func() {
 
-				go func() {
-
-					// release semaphore token
-					defer func() { 
-						<- semaphoreTokens
-					}()
-
-					defer wg.Done()
-
-					output, err := CLI.CreateReport(siteURL, false)
-
-					if err != nil {
-						LOGS.InfoLogger.Printf("Failure to fetch a report for %v", siteURL)
-						statusMap[siteURL] = FetchStatus{
-							true,
-							err,
-							"Failure to fetch a report for" + siteURL,
-							"",
-							time.Since(reportStart),
-						}
-					} else {
-						statusMap[siteURL] = FetchStatus{
-							false,
-							nil,
-							"Success",
-							output,
-							time.Since(reportStart),
-						}
-					}
-
-					statusMapSlice = append(statusMapSlice, statusMap)
-					
+				// release semaphore token
+				defer func() { 
+					<- semaphoreTokens
 				}()
 
-			}
+				defer wg.Done()
+
+				ok, err := CLI.CreateReport(siteURL, false)
+
+				if err != nil {
+					LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", siteURL)
+					statusMap[siteURL] = FetchStatus{
+						!ok,
+						err,
+						"Failure to fetch a report for" + siteURL,
+						time.Since(reportStart),
+					}
+				} else {
+					LOGS.InfoLogger.Printf("Successfully fetched a report for %v", siteURL)
+					statusMap[siteURL] = FetchStatus{
+						!ok,
+						nil,
+						"Success",
+						time.Since(reportStart),
+					}
+				}
+
+				statusMapSlice = append(statusMapSlice, statusMap)
+				
+			}()
 
 		}
 
@@ -184,7 +183,6 @@ func RefetchWebsites() []map[string]FetchStatus {
 			false,
 			nil,
 			"Success",
-			"",
 			finalTime,
 		}
 		statusMapSlice = append(statusMapSlice, timeStatusMap)

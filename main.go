@@ -50,7 +50,6 @@ var RegisteredWebsites = CONFIG.GetAllRegisteredWebsites()
 
 // POST | refetch a specific website
 func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("POST received")
 
 	// set headers
 	w.Header().Set("Content-Type", "application/json")
@@ -63,14 +62,16 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 
 	var status bool = false
 	var statusErr error
-	var statusPath string
+	var duration int64
 
 	// fetch website report
 	if len(requestedUrl) > 0 {
 		statusMap := REST.RefetchWebsite(requestedUrl)
+
+		duration = statusMap[requestedUrl].GetDuration().Milliseconds()
+
 		if !statusMap[requestedUrl].ErrorStatus() {
 			status = true
-			statusPath = statusMap[requestedUrl].GetReportPath()
 		} else {
 			statusErr = statusMap[requestedUrl].GetError()
 		}
@@ -80,13 +81,12 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 	if !status {
 		json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
 	} else {
-		json.NewEncoder(w).Encode(map[string]string{"status": "Success", "outputPath": statusPath})
+		json.NewEncoder(w).Encode(map[string]string{"status": "Success", "time_to_generate": strconv.FormatInt(duration, 10) + "ms"})
 	}
 }
 
 // POST | refetch all tracked websites
 func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("POST received")
 
 	// set headers
 	w.Header().Set("Content-Type", "application/json")
@@ -105,7 +105,6 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 	} else {
 		status = true
 	}
-
 
 	// get meta map from collection
 	var metaMap rest.FetchStatus
@@ -139,7 +138,7 @@ func getSingleWebsite(w http.ResponseWriter, r *http.Request) {
 	// get requested site name
 	var urlToTarget string
 	urlToTarget = url.Get("url")
-	fmt.Println(urlToTarget)
+	
 	// return if no website passed
 	if len(urlToTarget) < 1 {
 		json.NewEncoder(w).Encode(map[string]string{"status": "something went wrong"})

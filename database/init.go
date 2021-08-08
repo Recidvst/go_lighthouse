@@ -29,12 +29,12 @@ func createDB(name string) (bool, error) {
 	}
 
 	// prepare statements to create tables
-	statementTableSites, err := database.Prepare("CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING NOT NULL);")
+	statementTableSites, err := database.Prepare("CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING NOT NULL, url STRING NOT NULL, description STRING);")
 	mutex.Lock()
 	statementTableSites.Exec();
 	mutex.Unlock()
 
-	statementTableRecords, err := database.Prepare("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY UNIQUE NOT NULL, site_id INTEGER NOT NULL CONSTRAINT cx_results_site_id REFERENCES sites (id) ON DELETE NO ACTION ON UPDATE CASCADE, results_data STRING NOT NULL, date_fetched DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP), date_edited  DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP));")
+	statementTableRecords, err := database.Prepare("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY UNIQUE NOT NULL, site_id INTEGER NOT NULL CONSTRAINT cx_results_site_id REFERENCES sites (id) ON DELETE CASCADE ON UPDATE CASCADE, results_data STRING NOT NULL, date_fetched DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP), date_edited  DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP));")
 	mutex.Lock()
 	statementTableRecords.Exec();
 	mutex.Unlock()
@@ -51,9 +51,9 @@ func createDB(name string) (bool, error) {
 	mutex.Unlock()
 
 	// add an example row to each table for testing purposes
-	statementInsertTestRow, err := database.Prepare("INSERT INTO sites (name) VALUES (?);")
+	statementInsertTestRow, err := database.Prepare("INSERT INTO sites (name, description, url) VALUES (?, ?, ?);")
 	mutex.Lock()
-	statementInsertTestRow.Exec("example.com");
+	statementInsertTestRow.Exec("chris-snowden.me", "Personal website for Chris Snowden", "https://www.chris-snowden.me/");
 	mutex.Unlock()
 	statementInsertTestRow2, err := database.Prepare("INSERT INTO records (site_id, results_data, date_fetched) VALUES (?, ?, ?);")
 	mutex.Lock()
