@@ -50,8 +50,8 @@ func (f FetchStatus) GetDuration() time.Duration {
 	return f.Duration
 }
 
-// RefetchWebsite main function to trigger POST request to get site stats for specific named site
-func RefetchWebsite(url string) map[string]FetchStatus {
+// GetWebsiteStatistics main function to trigger POST request to get site stats for specific named site
+func GetWebsiteStatistics(url string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
 
@@ -67,8 +67,11 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 		}
 	}
 
+	// get site stats as a json string from the CLI tool
 	ok, jsonResultString, err := CLI.CreateReport(url, false)
 	fmt.Println(jsonResultString)
+
+	// add result to the database
 
 	if err != nil {
 		LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", url)
@@ -91,8 +94,8 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 	return statusMap
 }
 
-// RefetchWebsites main function to trigger POST request to get site stats for all available sites
-func RefetchWebsites(cb func()) []map[string]FetchStatus {
+// GetAllWebsiteStatistics main function to trigger POST request to get site stats for all available sites
+func GetAllWebsiteStatistics(cb func()) []map[string]FetchStatus {
 
 	// waitgroup to handle goroutines concurrent dispatch
 	var wg sync.WaitGroup

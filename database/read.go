@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// return all available sites
+// ReturnSiteList return all available sites
 func ReturnSiteList() ([]map[string]string, error) {
 
 	var sites []map[string]string
@@ -21,7 +21,7 @@ func ReturnSiteList() ([]map[string]string, error) {
 	var cwd, _ = os.Getwd()
 
 	// init database driver
-	database, err := sql.Open("sqlite3", cwd + "/database/" + DB_NAME)
+	database, err := sql.Open("sqlite3", cwd+"/database/"+DB_NAME)
 	defer database.Close()
 
 	if err != nil {
@@ -42,7 +42,7 @@ func ReturnSiteList() ([]map[string]string, error) {
 		var siteDetails = make(map[string]string)
 
 		rows.Scan(&id, &name, &url)
-		
+
 		siteDetails["id"] = strconv.Itoa(id)
 		siteDetails["name"] = name
 		siteDetails["url"] = url

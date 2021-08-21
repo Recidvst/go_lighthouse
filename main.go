@@ -70,7 +70,7 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 
 	// fetch website report
 	if len(requestedUrl) > 0 {
-		statusMap := REST.RefetchWebsite(requestedUrl)
+		statusMap := REST.GetWebsiteStatistics(requestedUrl)
 
 		duration = statusMap[requestedUrl].GetDuration().Milliseconds()
 
@@ -103,7 +103,7 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 	var statusErr error
 
 	// fetch website report
-	var statusMapsCollection = REST.RefetchWebsites(func() {})
+	var statusMapsCollection = REST.GetAllWebsiteStatistics(func() {})
 
 	if len(statusMapsCollection) < 1 {
 		statusErr = errors.New("failed to refetch any websites")

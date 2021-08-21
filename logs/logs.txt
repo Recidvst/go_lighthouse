@@ -12,3 +12,32 @@ ERROR: 2021/08/21 19:36:16 post.go:74: Failure to fetch a report for https://www
 INFO: 2021/08/21 19:38:12 post.go:82: Successfully fetched a report for https://www.chris-snowden.me/
 ERROR: 2021/08/21 19:43:44 post.go:74: Failure to fetch a report for https://www.chris-snowden.me/
 INFO: 2021/08/21 19:44:41 post.go:82: Successfully fetched a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/21 21:56:01 create.go:69: no such column: chris
+DEBUG: 2021/08/21 22:13:21 create.go:70: no such column: chris
+DEBUG: 2021/08/21 22:13:48 create.go:70: no such column: chris
+ERROR: 2021/08/21 22:15:10 create.go:70: no such column: chris
+ERROR: 2021/08/21 22:16:36 create.go:72: no such column: chris
+DEBUG: 2021/08/21 22:17:03 create.go:72: no such column: chris
+DEBUG: 2021/08/21 22:18:02 create.go:72: no such column: chris
+DEBUG: 2021/08/21 22:21:44 create.go:72: no such column: chris
+DEBUG: 2021/08/21 22:23:00 create.go:70: no such column: chris
+DEBUG: 2021/08/21 22:26:38 create.go:70: no such column: chris
+DEBUG: 2021/08/21 22:27:42 create.go:71: no such column: chris
+DEBUG: 2021/08/21 22:39:03 create.go:74: no such column: chris
+DEBUG: 2021/08/21 22:39:03 create.go:90: no such column: chris
+DEBUG: 2021/08/21 22:40:07 create.go:75: no such column: chris
+DEBUG: 2021/08/21 22:40:07 create.go:91: no such column: chris
+DEBUG: 2021/08/21 22:41:48 create.go:75: no such column: chris
+DEBUG: 2021/08/21 22:41:48 create.go:94: no such column: chris
+DEBUG: 2021/08/21 22:43:46 create.go:75: no such column: chris
+DEBUG: 2021/08/21 22:43:46 create.go:93: no such column: chris
+DEBUG: 2021/08/21 22:45:33 create.go:75: no such column: chris
+DEBUG: 2021/08/21 22:45:38 create.go:93: no such column: chris
+DEBUG: 2021/08/21 22:51:58 create.go:92: no such column: chris
+DEBUG: 2021/08/21 22:51:58 create.go:46: no such column: chris
+DEBUG: 2021/08/21 22:53:43 create.go:95: no such column: chris
+DEBUG: 2021/08/21 22:53:43 create.go:46: no such column: chris
+DEBUG: 2021/08/21 22:54:12 create.go:97: no such column: chris
+DEBUG: 2021/08/21 22:54:12 create.go:48: no such column: chris
+DEBUG: 2021/08/21 22:55:15 create.go:97: no such column: chris
+DEBUG: 2021/08/21 22:56:12 create.go:75: no such column: chris
