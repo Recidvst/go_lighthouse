@@ -1,15 +1,18 @@
 package cli
 
 import (
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
+	"os/exec"
+	"strconv"
+	"time"
 )
 
-func CreateReport(urlArg string, getDesktop bool) (success bool, err error) {
-	
-	fmt.Println("CreateReport")
+// CreateReport function handling the CLI command and returning result
+func CreateReport(urlArg string, getDesktop bool) (success bool, resultString string, err error) {
+
 	// full url of the website to be checked
 	urlToFetch := urlArg
 
@@ -22,10 +25,6 @@ func CreateReport(urlArg string, getDesktop bool) (success bool, err error) {
 	}
 	urlAsFolder = parsedURL.Host
 
-	// get the date, to use in outputPath
-	// currentDate := time.Now()
-	// dateAsFilename := currentDate.Format("02012006") // date as DDMMYYYY
-
 	// get current working directory
 	var cwd, _ = os.Getwd()
 
@@ -34,64 +33,53 @@ func CreateReport(urlArg string, getDesktop bool) (success bool, err error) {
 		mkdirErr := os.Mkdir(cwd+"/reports", 0755)
 		if mkdirErr != nil {
 			err = mkdirErr
-			return false, err
+			return false, "", err
 		}
 	}
 	if _, checkDirErr := os.Stat(cwd + "/reports/" + urlAsFolder); os.IsNotExist(checkDirErr) {
 		mkdirErr := os.Mkdir(cwd+"/reports/"+urlAsFolder, 0755)
 		if mkdirErr != nil {
 			err = mkdirErr
-			return false, err
+			return false, "", err
 		}
 	}
 
 	// handle desktop vs mobile presets
-	var presetFlag string = ""
+	var presetFlag = ""
 	if getDesktop {
 		presetFlag = "--preset=desktop"
 	}
 
+	// set temporary output path for the file we will read into memory as a string
+	temporaryOutputFileName := urlAsFolder + "__" + strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+	temporaryOutputFilePath := "--output-path=" + temporaryOutputFileName
+
 	// build slice of flags to pass to exec
-	flags := []string{urlToFetch, "--output=json", "-quiet", "--chrome-flags='--headless'", "--output-path=stdout", presetFlag}
-	fmt.Println(flags)
+	flags := []string{urlToFetch, "--output=json", "-quiet", "--chrome-flags='--headless'", temporaryOutputFilePath, presetFlag}
 
 	// run cli command
-	// c, b := exec.Command("lighthouse", flags...), new(strings.Builder)
-	// c.Stdout = b
-	// c.Run()
+	cmd := exec.Command("lighthouse", flags...)
 
-	// get stdout as string var
-	// var stdoutString = b.String()
-	// fmt.Println(stdoutString)
+	// catch error
+	if execErr := cmd.Run(); execErr != nil {
+		err = execErr
+		return false, "", err
+	}
 
-	// capturing stdout
-	// stdoutReader, execErr := cmd.StdoutPipe()
+	// now get the temporary file we created and read into a string
+	temporaryOutputFileAsBytes, err := ioutil.ReadFile(temporaryOutputFileName)
+	if err != nil {
+		return false, "", err
+	}
 
-	// if execErr != nil {
-	// 	log.Fatal(execErr)
-	// 	return false, execErr
-	// }
+	// convert bytes content to a string
+	temporaryOutputFileAsString := string(temporaryOutputFileAsBytes)
 
-	// scanner := bufio.NewScanner(stdoutReader)
-	// go func() {
-	// 	for scanner.Scan() {
-	// 		fmt.Printf("\t > %s\n", scanner.Text())
-	// 	}
-	// }()
+	// delete temporary file we created to clean up
+	deleteErr := os.Remove(temporaryOutputFileName)
+	if deleteErr != nil {
+		return false, "", deleteErr
+	}
 
-	// err = cmd.Start()
-	// if err != nil {
-	// 	fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
-	// 	return false, err
-	// }
-
-	// err = cmd.Wait()
-	// if err != nil {
-	// 	fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
-	// 	return false, err
-	// }
-
-	// TODO: now inject into Database
-
-	return true, nil
+	return true, temporaryOutputFileAsString, nil
 }

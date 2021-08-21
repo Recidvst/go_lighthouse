@@ -1,0 +1,14 @@
+INFO: 2021/08/21 18:45:57 post.go:86: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 18:58:50 post.go:86: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:17:03 post.go:86: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:17:05 post.go:86: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:17:10 post.go:86: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:17:45 post.go:86: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:18:38 post.go:80: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:18:47 post.go:156: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:21:38 post.go:156: Successfully fetched a report for https://www.chris-snowden.me/
+ERROR: 2021/08/21 19:34:29 post.go:74: Failure to fetch a report for https://www.chris-snowden.me/
+ERROR: 2021/08/21 19:36:16 post.go:74: Failure to fetch a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:38:12 post.go:82: Successfully fetched a report for https://www.chris-snowden.me/
+ERROR: 2021/08/21 19:43:44 post.go:74: Failure to fetch a report for https://www.chris-snowden.me/
+INFO: 2021/08/21 19:44:41 post.go:82: Successfully fetched a report for https://www.chris-snowden.me/

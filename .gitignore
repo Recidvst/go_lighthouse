@@ -19,6 +19,7 @@ dist/
 .cache
 .DS_Store
 .vscode
+.idea
 
 # Logs
 logs/files

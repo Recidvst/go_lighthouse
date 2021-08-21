@@ -53,6 +53,7 @@ var RegisteredWebsites = CONFIG.GetAllRegisteredWebsites()
 
 // POST | refetch a specific website
 func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Fetch single website")
 
 	// set headers
 	w.Header().Set("Content-Type", "application/json")
@@ -63,7 +64,7 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 	// get url param
 	requestedUrl := r.FormValue("url")
 
-	var status bool = false
+	var status = false
 	var statusErr error
 	var duration int64
 
@@ -90,6 +91,7 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 
 // POST | refetch all tracked websites
 func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Fetch all websites")
 
 	// set headers
 	w.Header().Set("Content-Type", "application/json")
@@ -97,11 +99,11 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 
-	var status bool = false
+	var status = false
 	var statusErr error
 
 	// fetch website report
-	var statusMapsCollection = REST.RefetchWebsites(func(){})
+	var statusMapsCollection = REST.RefetchWebsites(func() {})
 
 	if len(statusMapsCollection) < 1 {
 		statusErr = errors.New("failed to refetch any websites")
@@ -124,11 +126,11 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
 	} else {
 		json.NewEncoder(w).Encode(map[string]string{
-			"status": "Success", 
+			"status":                      "Success",
 			"number_of_reports_generated": strconv.Itoa(len(statusMapsCollection)),
-			"time_to_generate": strconv.FormatInt(timeToGenerate, 10) + "ms",
+			"time_to_generate":            strconv.FormatInt(timeToGenerate, 10) + "ms",
 		})
-	}	
+	}
 }
 
 // GET | get details for specific website
@@ -141,7 +143,7 @@ func getSingleWebsite(w http.ResponseWriter, r *http.Request) {
 	// get requested site name
 	var urlToTarget string
 	urlToTarget = url.Get("url")
-	
+
 	// return if no website passed
 	if len(urlToTarget) < 1 {
 		json.NewEncoder(w).Encode(map[string]string{"status": "something went wrong"})

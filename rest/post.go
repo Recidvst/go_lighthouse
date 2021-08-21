@@ -2,60 +2,55 @@ package rest
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	CLI "go_svelte_lighthouse/cli"
-	// CONFIG "go_svelte_lighthouse/config"
 	DATABASE "go_svelte_lighthouse/database"
 	LOGS "go_svelte_lighthouse/logs"
 )
 
-// structs for the urls found in the site manifest
-type Sites struct {
-	Sites []Site `json:sites`
-}
-type Site struct {
-	Name string `json:name`
-	URL  string `json:url`
-}
+// sites struct to contain slice of site structs
+//type sites struct {
+//	Sites []site `json:"sites"`
+//}
+//
+//// site struct for the urls found in the site manifest
+//type site struct {
+//	Name string `json:"name"`
+//	URL  string `json:"url"`
+//}
 
-// structs for the function return to handle errors and return the created report path
+// FetchStatus structs for the function return to handle errors and return the created report path
 type FetchStatus struct {
-	DidError   bool
-	Error      error
-	Message    string
-	Duration   time.Duration
-}
-type FetchStatusSlice struct {
-	Statuses []FetchStatus
 	DidError bool
 	Error    error
-	FullDuration	float64
+	Message  string
+	Duration time.Duration
 }
 
-// getters for FetchStatus struct
+// ErrorStatus getters for FetchStatus struct
 func (f FetchStatus) ErrorStatus() bool {
 	return f.DidError
 }
+
+// GetError getter method
 func (f FetchStatus) GetError() error {
 	return f.Error
 }
+
+// GetMessage getter method
 func (f FetchStatus) GetMessage() string {
 	return f.Message
 }
+
+// GetDuration getter method
 func (f FetchStatus) GetDuration() time.Duration {
 	return f.Duration
 }
 
-// getters for FetchStatusSlice struct
-func (f FetchStatusSlice) ErrorStatus() bool {
-	return f.DidError
-}
-func (f FetchStatusSlice) GetError() error {
-	return f.Error
-}
-
+// RefetchWebsite main function to trigger POST request to get site stats for specific named site
 func RefetchWebsite(url string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
@@ -72,7 +67,8 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 		}
 	}
 
-	ok, err := CLI.CreateReport(url, false)
+	ok, jsonResultString, err := CLI.CreateReport(url, false)
+	fmt.Println(jsonResultString)
 
 	if err != nil {
 		LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", url)
@@ -95,6 +91,7 @@ func RefetchWebsite(url string) map[string]FetchStatus {
 	return statusMap
 }
 
+// RefetchWebsites main function to trigger POST request to get site stats for all available sites
 func RefetchWebsites(cb func()) []map[string]FetchStatus {
 
 	// waitgroup to handle goroutines concurrent dispatch
@@ -111,7 +108,7 @@ func RefetchWebsites(cb func()) []map[string]FetchStatus {
 
 	// grab all available sites and their urls from manifest file (sites.json)
 	var allUrls []map[string]string
-	sitesSlice, err := DATABASE.ReturnSiteList();
+	sitesSlice, err := DATABASE.ReturnSiteList()
 	if err != nil {
 		LOGS.ErrorLogger.Println("Failure to fetch a list of available sites")
 	}
@@ -141,13 +138,14 @@ func RefetchWebsites(cb func()) []map[string]FetchStatus {
 			go func() {
 
 				// release semaphore token
-				defer func() { 
-					<- semaphoreTokens
+				defer func() {
+					<-semaphoreTokens
 				}()
 
 				defer wg.Done()
 
-				ok, err := CLI.CreateReport(siteURL, false)
+				ok, jsonResultString, err := CLI.CreateReport(siteURL, false)
+				fmt.Println(jsonResultString)
 
 				if err != nil {
 					LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", siteURL)
@@ -168,7 +166,7 @@ func RefetchWebsites(cb func()) []map[string]FetchStatus {
 				}
 
 				statusMapSlice = append(statusMapSlice, statusMap)
-				
+
 			}()
 
 		}
@@ -186,7 +184,7 @@ func RefetchWebsites(cb func()) []map[string]FetchStatus {
 		statusMapSlice = append(statusMapSlice, timeStatusMap)
 
 	}
-	
+
 	// trigger optional callback
 	cb()
 	return statusMapSlice
