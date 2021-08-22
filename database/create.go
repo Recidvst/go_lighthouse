@@ -67,7 +67,7 @@ func InsertDatabaseRowRecord(sitename string, url string, record string) (bool, 
 	var returnedNewSiteId int
 
 	// check that the site exists
-	siteQueryString := "SELECT id FROM sites WHERE name LIKE " + sitename
+	siteQueryString := "SELECT id FROM sites WHERE name LIKE " + "'" + sitename + "'"
 	// make the query
 	doesSiteExist, err := database.Query(siteQueryString)
 	if err != nil {
@@ -83,7 +83,7 @@ func InsertDatabaseRowRecord(sitename string, url string, record string) (bool, 
 	if returnedSiteId < 1 {
 		InsertDatabaseRowSite(sitename, "Default description for site: "+sitename, url)
 		// then, get the id for that site (we need this to insert a record row)
-		siteIdQueryString := "SELECT id FROM sites WHERE name LIKE " + "\"" + sitename + "\""
+		siteIdQueryString := "SELECT id FROM sites WHERE name LIKE " + "'" + sitename + "'"
 		// make the query
 		siteIdQuery, err := database.Query(siteIdQueryString)
 		if err != nil {

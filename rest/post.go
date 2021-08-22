@@ -3,24 +3,15 @@ package rest
 import (
 	"errors"
 	"fmt"
-	"sync"
-	"time"
-
 	CLI "go_svelte_lighthouse/cli"
 	DATABASE "go_svelte_lighthouse/database"
 	LOGS "go_svelte_lighthouse/logs"
+	"log"
+	"net/url"
+	"strings"
+	"sync"
+	"time"
 )
-
-// sites struct to contain slice of site structs
-//type sites struct {
-//	Sites []site `json:"sites"`
-//}
-//
-//// site struct for the urls found in the site manifest
-//type site struct {
-//	Name string `json:"name"`
-//	URL  string `json:"url"`
-//}
 
 // FetchStatus structs for the function return to handle errors and return the created report path
 type FetchStatus struct {
@@ -51,13 +42,13 @@ func (f FetchStatus) GetDuration() time.Duration {
 }
 
 // GetWebsiteStatistics main function to trigger POST request to get site stats for specific named site
-func GetWebsiteStatistics(url string) map[string]FetchStatus {
+func GetWebsiteStatistics(urlToFetch string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
 
 	reportStart := time.Now()
 
-	if len(url) < 1 {
+	if len(urlToFetch) < 1 {
 		LOGS.DebugLogger.Println("Attempted to fetch a website without providing a URL")
 		statusMap["nourl"] = FetchStatus{
 			true, // true = did error
@@ -67,24 +58,49 @@ func GetWebsiteStatistics(url string) map[string]FetchStatus {
 		}
 	}
 
+	// strip protocol, args etc. from the url to make nice sitename
+	var sitename string
+	parsedURL, err := url.Parse(urlToFetch)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// just get the host part of the url
+	sitename = parsedURL.Host
+	// also remove www.
+	sitename = strings.Replace(sitename, "www.", "", -1)
+
+	// set a combined status variable (tracks CLI success plus DB write success)
+	var combinedSuccessStatus bool
+
 	// get site stats as a json string from the CLI tool
-	ok, jsonResultString, err := CLI.CreateReport(url, false)
-	fmt.Println(jsonResultString)
+	ok, jsonResultString, err := CLI.CreateReport(urlToFetch, false)
 
 	// add result to the database
+	writeSuccess, writeError := DATABASE.InsertDatabaseRowRecord(sitename, urlToFetch, jsonResultString)
+	if writeError != nil {
+		LOGS.ErrorLogger.Fatalln(writeError)
+	}
+
+	// update the combined status variable for use in returned statusMap
+	if ok && writeSuccess {
+		combinedSuccessStatus = true
+	}
+
+	fmt.Println("combinedSuccessStatus")
+	fmt.Println(combinedSuccessStatus)
 
 	if err != nil {
-		LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", url)
-		statusMap[url] = FetchStatus{
-			!ok,
+		LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", urlToFetch)
+		statusMap[urlToFetch] = FetchStatus{
+			!combinedSuccessStatus,
 			err,
-			"Failure to fetch a report for" + url,
+			"Failure to fetch a report for" + urlToFetch,
 			time.Since(reportStart),
 		}
 	} else {
-		LOGS.InfoLogger.Printf("Successfully fetched a report for %v", url)
-		statusMap[url] = FetchStatus{
-			!ok,
+		LOGS.InfoLogger.Printf("Successfully fetched a report for %v", urlToFetch)
+		statusMap[urlToFetch] = FetchStatus{
+			!combinedSuccessStatus,
 			nil,
 			"Success",
 			time.Since(reportStart),

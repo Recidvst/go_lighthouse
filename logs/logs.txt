@@ -41,3 +41,13 @@ DEBUG: 2021/08/21 22:54:12 create.go:97: no such column: chris
 DEBUG: 2021/08/21 22:54:12 create.go:48: no such column: chris
 DEBUG: 2021/08/21 22:55:15 create.go:97: no such column: chris
 DEBUG: 2021/08/21 22:56:12 create.go:75: no such column: chris
+DEBUG: 2021/08/22 10:02:37 create.go:74: no such column: www.chris
+INFO: 2021/08/22 10:02:37 post.go:98: Successfully fetched a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/22 10:09:38 create.go:74: no such column: chris
+INFO: 2021/08/22 10:09:38 post.go:103: Successfully fetched a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/22 10:14:20 create.go:83: no such column: chris
+DEBUG: 2021/08/22 10:15:39 create.go:83: no such column: chris
+INFO: 2021/08/22 10:15:39 post.go:101: Successfully fetched a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/22 10:17:50 create.go:83: no such column: chris
+INFO: 2021/08/22 10:17:50 post.go:101: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 10:20:45 post.go:101: Successfully fetched a report for https://www.chris-snowden.me/

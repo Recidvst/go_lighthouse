@@ -30,7 +30,7 @@ func createDB(name string) (bool, error) {
 	}
 
 	// prepare statements to create tables
-	statementTableSites, err := database.Prepare("CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING NOT NULL, url STRING NOT NULL, description STRING);")
+	statementTableSites, err := database.Prepare("CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING UNIQUE NOT NULL, url STRING NOT NULL, description STRING);")
 	if err != nil {
 		LOGS.ErrorLogger.Fatalln(err)
 	}
