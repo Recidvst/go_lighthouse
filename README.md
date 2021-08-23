@@ -2,10 +2,21 @@
 
 > A lighthouse score tracking tool in Go, SQLite and React/Svelte.
 
-- Go REST API and cron for fetching website performance scores with the Google Lighthouse [CLI tool](https://github.com/GoogleChrome/lighthouse#using-the-node-cli 'Lighthouse CLI tool docs on GitHub'). Data saved locally in the app with SQLite.
+- Go REST API and cron for fetching website performance scores with the Google
+  Lighthouse [CLI tool](https://github.com/GoogleChrome/lighthouse#using-the-node-cli 'Lighthouse CLI tool docs on GitHub')
+  . Data saved locally in the app with SQLite.
 - React & Svelte widgets for displaying the results.
 
 **Very much in progress..**
+
+## TODO:
+
+- Test suite (Go testing package)
+- Add basic templates for viewing response directly
+- Fix bug where date_fetched and date_edited in DB are in different timezones (GMT / BST)
+- Fix bug where temporary CLI results file is not always removed.
+- Decide how to handle description field in the site table.
+- Code needs a bit of a tidy in terms of structure and organised comments
 
 ## Endpoints
 
@@ -15,41 +26,41 @@ Check if the API is up
 
 ### `GET /website?url=https://github.com/`
 
-Fetch the latest report for a specific website
+Fetch the latest report saved in the DB for a specific website
 
 Params:
 
-```js
+```shell
 url String (required) (url param)
 ```
 
 ### `GET /websites`
 
-Fetch the latest report for all registered websites
+Fetch the latest report saved in the DB for all registered websites
 
 Params:
 
-```js
+```shell
 url String (required) (url param)
 ```
 
 ### `POST /website`
 
-Trigger a refetch for a specific website
+Trigger a refetch of the report for a specific website
 
 Params:
 
-```js
+```shell
 url String (required) (url param)
 ```
 
 ### `POST /websites`
 
-Trigger a refetch for all registered websites
+Trigger a refetch of the report for all registered websites
 
 Params:
 
-```js
+```shell
 n / a
 ```
 
@@ -59,7 +70,7 @@ View the latest report for a specific website
 
 Params:
 
-```js
+```shell
 url String (required) (url param)
 ```
 
@@ -69,6 +80,6 @@ View the latest reports for all registered websites
 
 Params:
 
-```js
+```shell
 TBC
 ```

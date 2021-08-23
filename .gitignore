@@ -21,6 +21,9 @@ dist/
 .vscode
 .idea
 
+# Don't track the DB file (data)
+database/*.db
+
 # Logs
 logs/files
 logs/logs.txt
@@ -28,6 +31,9 @@ logs/logs.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Temp files
+*.temp
 
 # Runtime data
 pids

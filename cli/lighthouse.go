@@ -7,11 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"sync"
 	"time"
 )
 
 // CreateReport function handling the CLI command and returning result
 func CreateReport(urlArg string, getDesktop bool) (success bool, resultString string, err error) {
+
+	// mutex lock
+	var mutex = &sync.Mutex{}
 
 	// full url of the website to be checked
 	urlToFetch := urlArg
@@ -51,7 +55,7 @@ func CreateReport(urlArg string, getDesktop bool) (success bool, resultString st
 	}
 
 	// set temporary output path for the file we will read into memory as a string
-	temporaryOutputFileName := urlAsFolder + "__" + strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+	temporaryOutputFileName := urlAsFolder + "__" + strconv.FormatInt(time.Now().UTC().UnixNano(), 10) + ".temp"
 	temporaryOutputFilePath := "--output-path=" + temporaryOutputFileName
 
 	// build slice of flags to pass to exec
@@ -76,7 +80,9 @@ func CreateReport(urlArg string, getDesktop bool) (success bool, resultString st
 	temporaryOutputFileAsString := string(temporaryOutputFileAsBytes)
 
 	// delete temporary file we created to clean up
+	mutex.Lock()
 	deleteErr := os.Remove(temporaryOutputFileName)
+	mutex.Unlock()
 	if deleteErr != nil {
 		return false, "", deleteErr
 	}

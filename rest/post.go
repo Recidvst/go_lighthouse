@@ -2,16 +2,24 @@ package rest
 
 import (
 	"errors"
-	"fmt"
 	CLI "go_svelte_lighthouse/cli"
 	DATABASE "go_svelte_lighthouse/database"
 	LOGS "go_svelte_lighthouse/logs"
 	"log"
 	"net/url"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
+
+// SiteObject struct to hold site details when fetching data
+type SiteObject struct {
+	name           string
+	url            string
+	id             string
+	responseString string
+}
 
 // FetchStatus structs for the function return to handle errors and return the created report path
 type FetchStatus struct {
@@ -86,9 +94,6 @@ func GetWebsiteStatistics(urlToFetch string) map[string]FetchStatus {
 		combinedSuccessStatus = true
 	}
 
-	fmt.Println("combinedSuccessStatus")
-	fmt.Println(combinedSuccessStatus)
-
 	if err != nil {
 		LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", urlToFetch)
 		statusMap[urlToFetch] = FetchStatus{
@@ -116,8 +121,14 @@ func GetAllWebsiteStatistics(cb func()) []map[string]FetchStatus {
 	// waitgroup to handle goroutines concurrent dispatch
 	var wg sync.WaitGroup
 
-	// counting semaphore to limit goroutines to 20
-	var semaphoreTokens = make(chan struct{}, 20)
+	// get avialble cores
+	coresAmount := runtime.NumCPU()
+	// counting semaphore to limit goroutines to available cores
+	var semaphoreTokensChannel = make(chan struct{}, coresAmount)
+
+	// channels to hold responses and errors and then tackle each one at a time later
+	var responsesChannel = make(chan SiteObject)
+	var responsesErrorsChannel = make(chan error)
 
 	// fn returns a slice of maps
 	var statusMapSlice []map[string]FetchStatus
@@ -125,84 +136,118 @@ func GetAllWebsiteStatistics(cb func()) []map[string]FetchStatus {
 	// track time taken to fetch all sites
 	startTime := time.Now()
 
-	// grab all available sites and their urls from manifest file (sites.json)
+	// grab all available sites and their urls from DB
 	var allUrls []map[string]string
 	sitesSlice, err := DATABASE.ReturnSiteList()
 	if err != nil {
-		LOGS.ErrorLogger.Println("Failure to fetch a list of available sites")
+		LOGS.ErrorLogger.Fatalln("Failure to fetch a list of available sites")
 	}
 
 	allUrls = append(allUrls, sitesSlice...)
 
-	// allUrls = CONFIG.GetAllRegisteredWebsites()
+	// loops to get the map interfaces for the sites
+	for _, siteMap := range allUrls {
+		siteName := siteMap["name"]
+		siteURL := siteMap["url"]
+		siteId := siteMap["id"]
 
-	if len(allUrls) > 0 {
+		// set object with values as above
+		var currentSite = SiteObject{
+			siteName,
+			siteURL,
+			siteId,
+			"",
+		}
 
-		// loops to get the map interfaces for the sites
-		for _, siteMap := range allUrls {
-			siteURL := siteMap["url"]
+		// make a status map to be returned
+		statusMap := make(map[string]FetchStatus)
 
-			// make a status map to be returned
-			statusMap := make(map[string]FetchStatus)
+		// add to waitgroup
+		wg.Add(1)
+
+		// start timer
+		reportStart := time.Now()
+
+		go func() {
 
 			// get semaphore token
-			semaphoreTokens <- struct{}{}
+			semaphoreTokensChannel <- struct{}{}
 
-			// add to waitgroup
-			wg.Add(1)
-
-			// start timer
-			reportStart := time.Now()
-
-			go func() {
-
+			defer func() {
 				// release semaphore token
-				defer func() {
-					<-semaphoreTokens
-				}()
-
-				defer wg.Done()
-
-				ok, jsonResultString, err := CLI.CreateReport(siteURL, false)
-				fmt.Println(jsonResultString)
-
-				if err != nil {
-					LOGS.ErrorLogger.Printf("Failure to fetch a report for %v", siteURL)
-					statusMap[siteURL] = FetchStatus{
-						!ok,
-						err,
-						"Failure to fetch a report for" + siteURL,
-						time.Since(reportStart),
-					}
-				} else {
-					LOGS.InfoLogger.Printf("Successfully fetched a report for %v", siteURL)
-					statusMap[siteURL] = FetchStatus{
-						!ok,
-						nil,
-						"Success",
-						time.Since(reportStart),
-					}
-				}
-
-				statusMapSlice = append(statusMapSlice, statusMap)
-
+				<-semaphoreTokensChannel
 			}()
 
-		}
+			defer wg.Done()
 
-		wg.Wait()
-		// send total time back to main
-		finalTime := time.Since(startTime)
-		timeStatusMap := make(map[string]FetchStatus)
-		timeStatusMap["meta"] = FetchStatus{
-			false,
-			nil,
-			"Success",
-			finalTime,
-		}
-		statusMapSlice = append(statusMapSlice, timeStatusMap)
+			// get report from the CLI tool
+			ok, jsonResultString, err := CLI.CreateReport(siteURL, false)
+			if err != nil {
+				responsesErrorsChannel <- err
+			}
+
+			// add results to current site iteration object
+			currentSite.responseString = jsonResultString
+
+			if err != nil {
+				responsesErrorsChannel <- errors.New("Failure to fetch a report for " + siteURL)
+				statusMap[siteURL] = FetchStatus{
+					!ok,
+					err,
+					"Failure to fetch a report for" + siteURL,
+					time.Since(reportStart),
+				}
+			} else {
+				LOGS.InfoLogger.Printf("Successfully fetched a report for %v", siteURL)
+				statusMap[siteURL] = FetchStatus{
+					!ok,
+					nil,
+					"Success",
+					time.Since(reportStart),
+				}
+			}
+
+			statusMapSlice = append(statusMapSlice, statusMap)
+
+			// pass results to the responses channel
+			responsesChannel <- currentSite
+		}()
 
 	}
+
+	// wait to close the open channels until goroutines are complete
+	go func() {
+		wg.Wait()
+		close(responsesChannel)
+		close(responsesErrorsChannel)
+		close(semaphoreTokensChannel)
+	}()
+
+	// loop over responses channel to get the data
+	// resp is an iteration of the currentSite struct
+	for resp := range responsesChannel {
+		// add result to the database
+		_, writeError := DATABASE.InsertDatabaseRowRecord(resp.name, resp.url, resp.responseString)
+		if writeError != nil {
+			LOGS.ErrorLogger.Println(writeError)
+		}
+	}
+	// loop over responses errors channel if not empty
+	for errResp := range responsesErrorsChannel {
+		// write error
+		LOGS.ErrorLogger.Println(errResp)
+	}
+
+	// send total time back to main
+	finalTime := time.Since(startTime)
+	timeStatusMap := make(map[string]FetchStatus)
+	timeStatusMap["meta"] = FetchStatus{
+		false,
+		nil,
+		"Success",
+		finalTime,
+	}
+	statusMapSlice = append(statusMapSlice, timeStatusMap)
 
 	// trigger optional callback
 	cb()

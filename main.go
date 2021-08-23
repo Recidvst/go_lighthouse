@@ -91,7 +91,6 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 
 // POST | refetch all tracked websites
 func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Fetch all websites")
 
 	// set headers
 	w.Header().Set("Content-Type", "application/json")
@@ -127,7 +126,7 @@ func fetchAllWebsites(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status":                      "Success",
-			"number_of_reports_generated": strconv.Itoa(len(statusMapsCollection)),
+			"number_of_reports_generated": strconv.Itoa(len(statusMapsCollection) - 1), // minus 1 because we need to account for the extra 'timeStatusMap' meta entry
 			"time_to_generate":            strconv.FormatInt(timeToGenerate, 10) + "ms",
 		})
 	}

@@ -51,3 +51,73 @@ INFO: 2021/08/22 10:15:39 post.go:101: Successfully fetched a report for https:/
 DEBUG: 2021/08/22 10:17:50 create.go:83: no such column: chris
 INFO: 2021/08/22 10:17:50 post.go:101: Successfully fetched a report for https://www.chris-snowden.me/
 INFO: 2021/08/22 10:20:45 post.go:101: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:16:58 post.go:207: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:18:25 post.go:207: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:20:40 post.go:206: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:28:17 post.go:208: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:29:01 post.go:206: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:30:32 post.go:106: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:30:50 post.go:106: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:31:35 post.go:206: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:31:36 post.go:206: Successfully fetched a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/22 22:31:52 post.go:187: exit status 1
+ERROR: 2021/08/22 22:31:52 post.go:198: Failure to fetch a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:33:10 post.go:206: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:33:10 post.go:206: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:33:14 post.go:206: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:35:34 post.go:206: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:35:35 post.go:206: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:35:36 post.go:206: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:38:01 post.go:206: Successfully fetched a report for https://github.com/Recidvst
+DEBUG: 2021/08/22 22:38:21 post.go:187: exit status 1
+ERROR: 2021/08/22 22:38:21 post.go:198: Failure to fetch a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/22 22:38:21 post.go:187: exit status 1
+ERROR: 2021/08/22 22:38:21 post.go:198: Failure to fetch a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:39:55 post.go:204: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:39:55 post.go:204: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:39:59 post.go:204: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:51:51 post.go:204: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:51:52 post.go:204: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:51:53 post.go:204: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:56:12 post.go:202: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 22:56:13 post.go:202: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 22:56:14 post.go:202: Successfully fetched a report for https://www.bbc.co.uk/
+DEBUG: 2021/08/22 22:57:37 post.go:187: exit status 1
+ERROR: 2021/08/22 22:57:37 post.go:194: Failure to fetch a report for https://www.chris-snowden.me/
+DEBUG: 2021/08/22 22:57:37 post.go:187: exit status 1
+ERROR: 2021/08/22 22:57:37 post.go:194: Failure to fetch a report for https://github.com/Recidvst
+DEBUG: 2021/08/22 22:57:38 post.go:187: exit status 1
+ERROR: 2021/08/22 22:57:38 post.go:194: Failure to fetch a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 22:59:43 post.go:204: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 23:00:37 post.go:200: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 23:00:39 post.go:200: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 23:00:41 post.go:200: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/22 23:03:02 post.go:198: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/22 23:03:02 post.go:198: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/22 23:03:06 post.go:198: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 08:39:09 post.go:198: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 08:39:11 post.go:198: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 08:39:11 post.go:198: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 08:45:19 post.go:198: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 08:45:20 post.go:198: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 08:45:21 post.go:198: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 08:48:07 post.go:199: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 08:48:08 post.go:199: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 08:48:10 post.go:199: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 08:51:41 post.go:199: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 08:51:42 post.go:199: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 08:51:43 post.go:199: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 08:55:17 post.go:198: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 08:55:19 post.go:198: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 08:55:19 post.go:198: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 09:01:44 post.go:198: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 09:01:44 post.go:198: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 09:01:47 post.go:198: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 09:04:00 post.go:198: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 09:04:01 post.go:198: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 09:12:17 post.go:201: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 09:12:19 post.go:201: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/23 09:12:21 post.go:201: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 09:14:39 post.go:200: Successfully fetched a report for https://www.chris-snowden.me/
+INFO: 2021/08/23 09:14:54 post.go:200: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/23 09:15:06 post.go:200: Successfully fetched a report for https://github.com/Recidvst
