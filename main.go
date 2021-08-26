@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	LOGS "go_svelte_lighthouse/logs"
 	"log"
 	"net/http"
 	"strconv"
@@ -61,7 +62,7 @@ func fetchSingleWebsite(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 
-	// get url param
+	// get url param (in body)
 	requestedUrl := r.FormValue("url")
 
 	var status = false
@@ -151,6 +152,76 @@ func getSingleWebsite(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "TODO"})
 }
 
+// DELETE | delete all records for specific website
+func deleteSingleWebsite(w http.ResponseWriter, r *http.Request) {
+	// get site_id param (in body)
+	var inwardID = r.FormValue("site_id")
+
+	// string to int
+	onwardID, err := strconv.ParseInt(inwardID, 10, 8)
+
+	if err != nil || onwardID < 1 {
+		LOGS.ErrorLogger.Fatalln(err)
+	}
+
+	var status = false
+	var statusErr error
+	var duration int64
+
+	// delete site
+	statusMap := REST.DeleteWebsite(int(onwardID))
+
+	duration = statusMap["deleted"].GetDuration().Milliseconds()
+
+	if !statusMap["deleted"].ErrorStatus() {
+		status = true
+	} else {
+		statusErr = statusMap["deleted"].GetError()
+	}
+
+	// send a response depending on error or success
+	if !status {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
+	} else {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Success", "time_to_delete": strconv.FormatInt(duration, 10) + "ms"})
+	}
+}
+
+// DELETE | delete a single specified record
+func deleteSingleRecord(w http.ResponseWriter, r *http.Request) {
+	// get record_id param (in body)
+	var inwardID = r.FormValue("record_id")
+
+	// string to int
+	onwardID, err := strconv.ParseInt(inwardID, 10, 8)
+
+	if err != nil || onwardID < 1 {
+		LOGS.ErrorLogger.Fatalln(err)
+	}
+
+	var status = false
+	var statusErr error
+	var duration int64
+
+	// delete site
+	statusMap := REST.DeleteRecord(int(onwardID))
+
+	duration = statusMap["deleted"].GetDuration().Milliseconds()
+
+	if !statusMap["deleted"].ErrorStatus() {
+		status = true
+	} else {
+		statusErr = statusMap["deleted"].GetError()
+	}
+
+	// send a response depending on error or success
+	if !status {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Error", "error": statusErr.Error()})
+	} else {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Success", "time_to_delete": strconv.FormatInt(duration, 10) + "ms"})
+	}
+}
+
 // GET | get details for all tracked websites
 func getAllWebsites(w http.ResponseWriter, r *http.Request) {
 	if EnvironmentType != "production" {
@@ -197,6 +268,12 @@ func main() {
 
 	// GET | view details for specific website in a browser, via html template
 	r.HandleFunc("/website", viewSingleWebsite).Methods("GET", "OPTIONS")
+
+	// DELETE | delete site record and associated records
+	r.HandleFunc("/website", deleteSingleWebsite).Methods("DELETE", "OPTIONS")
+
+	// DELETE | delete specific record
+	r.HandleFunc("/record", deleteSingleRecord).Methods("DELETE", "OPTIONS")
 
 	// Start server
 	log.Fatalln(http.ListenAndServe(":9999", r))

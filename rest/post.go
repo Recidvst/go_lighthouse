@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// SiteObject struct to hold site details when fetching data
+// SiteObject | struct to hold site details when fetching data
 type SiteObject struct {
 	name           string
 	url            string
@@ -21,7 +21,7 @@ type SiteObject struct {
 	responseString string
 }
 
-// FetchStatus structs for the function return to handle errors and return the created report path
+// FetchStatus | structs for the function return to handle errors and return the created report path
 type FetchStatus struct {
 	DidError bool
 	Error    error
@@ -29,27 +29,27 @@ type FetchStatus struct {
 	Duration time.Duration
 }
 
-// ErrorStatus getters for FetchStatus struct
+// ErrorStatus | getters for FetchStatus struct
 func (f FetchStatus) ErrorStatus() bool {
 	return f.DidError
 }
 
-// GetError getter method
+// GetError | getter method
 func (f FetchStatus) GetError() error {
 	return f.Error
 }
 
-// GetMessage getter method
+// GetMessage | getter method
 func (f FetchStatus) GetMessage() string {
 	return f.Message
 }
 
-// GetDuration getter method
+// GetDuration | getter method
 func (f FetchStatus) GetDuration() time.Duration {
 	return f.Duration
 }
 
-// GetWebsiteStatistics main function to trigger POST request to get site stats for specific named site
+// GetWebsiteStatistics | main function to trigger POST request to get site stats for specific named site
 func GetWebsiteStatistics(urlToFetch string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
@@ -115,7 +115,7 @@ func GetWebsiteStatistics(urlToFetch string) map[string]FetchStatus {
 	return statusMap
 }
 
-// GetAllWebsiteStatistics main function to trigger POST request to get site stats for all available sites
+// GetAllWebsiteStatistics | main function to trigger POST request to get site stats for all available sites
 func GetAllWebsiteStatistics(cb func()) []map[string]FetchStatus {
 
 	// waitgroup to handle goroutines concurrent dispatch
