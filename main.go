@@ -210,10 +210,10 @@ func deleteSingleRecord(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PUT | update a single specified website
+// PATCH | update a single specified website
 func updateSingleWebsite(w http.ResponseWriter, r *http.Request) {
 	// get record_id param (in body)
-	var inwardID = r.FormValue("record_id")
+	var inwardID = r.FormValue("site_id")
 	var inwardOnwardSitename = r.FormValue("sitename")
 	var inwardOnwardUrl = r.FormValue("url")
 	var inwardOnwardDescription = r.FormValue("description")
@@ -223,6 +223,10 @@ func updateSingleWebsite(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		LOGS.ErrorLogger.Println(err)
+	}
+
+	if onwardID < 1 {
+		LOGS.DebugLogger.Println("Request to updateSingleWebsite missing valid site ID")
 	}
 
 	var status = false
@@ -270,6 +274,10 @@ func updateSingleRecord(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		LOGS.ErrorLogger.Println(err)
+	}
+
+	if onwardID < 1 {
+		LOGS.DebugLogger.Println("Request to updateSingleRecord missing valid record ID")
 	}
 
 	var status = false
@@ -375,10 +383,10 @@ func main() {
 	r.HandleFunc("/record", deleteSingleRecord).Methods("DELETE", "OPTIONS")
 
 	// PUT | update specific site details
-	r.HandleFunc("/website", updateSingleWebsite).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/website", updateSingleWebsite).Methods("PATCH", "OPTIONS")
 
-	// PUT | update specific record
-	r.HandleFunc("/record", updateSingleRecord).Methods("PUT", "OPTIONS")
+	// PATCH | update specific record
+	r.HandleFunc("/record", updateSingleRecord).Methods("PATCH", "OPTIONS")
 
 	// Start server
 	log.Fatalln(http.ListenAndServe(":9999", r))

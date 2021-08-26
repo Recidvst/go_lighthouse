@@ -124,3 +124,19 @@ INFO: 2021/08/23 09:15:06 post.go:200: Successfully fetched a report for https:/
 INFO: 2021/08/26 19:15:17 delete.go:43: Successfully deleted the site with ID of 3
 INFO: 2021/08/26 19:15:48 delete.go:87: Successfully deleted the record with ID of 40
 INFO: 2021/08/26 19:17:45 delete.go:43: Successfully deleted the site with ID of 2
+INFO: 2021/08/26 20:19:41 post.go:106: Successfully fetched a report for https://www.bbc.co.uk/
+INFO: 2021/08/26 20:20:14 post.go:106: Successfully fetched a report for https://github.com/Recidvst
+INFO: 2021/08/26 20:30:30 update.go:117: Successfully updated the record with ID of 1
+ERROR: 2021/08/26 20:34:53 main.go:225: strconv.ParseInt: parsing "": invalid syntax
+DEBUG: 2021/08/26 20:34:53 main.go:233: Request to updateSingleWebsite missing valid record ID
+DEBUG: 2021/08/26 20:34:53 update.go:19: Attempted to update a record without providing a valid record ID
+INFO: 2021/08/26 20:34:53 update.go:63: Successfully updated the site with ID of 0
+ERROR: 2021/08/26 20:37:23 main.go:225: strconv.ParseInt: parsing "": invalid syntax
+DEBUG: 2021/08/26 20:37:23 main.go:233: Request to updateSingleWebsite missing valid record ID
+DEBUG: 2021/08/26 20:37:23 update.go:19: Attempted to update a record without providing a valid record ID
+INFO: 2021/08/26 20:37:23 update.go:63: Successfully updated the site with ID of 0
+ERROR: 2021/08/26 20:38:53 main.go:225: strconv.ParseInt: parsing "": invalid syntax
+DEBUG: 2021/08/26 20:38:53 main.go:233: Request to updateSingleWebsite missing valid record ID
+DEBUG: 2021/08/26 20:38:53 update.go:19: Attempted to update a record without providing a valid record ID
+INFO: 2021/08/26 20:38:53 update.go:63: Successfully updated the site with ID of 0
+INFO: 2021/08/26 20:40:48 update.go:63: Successfully updated the site with ID of 2

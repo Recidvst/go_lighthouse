@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	LOGS "go_svelte_lighthouse/logs"
 	"os"
 	"sync"
@@ -30,10 +29,10 @@ func UpdateSiteRow(siteID int, newSitename string, newUrl string, newDescription
 
 	// update record by ID
 	currentTime := time.Now()
-	updateStatement := fmt.Sprintf("UPDATE sites SET name = %v, url = %v, description = %v, date_edited=%v WHERE id = %v", newSitename, newUrl, newDescription, currentTime.Format("2006-01-02 15:04:05"), siteID)
-	statementUpdateRecord, _ := database.Prepare(updateStatement)
+	currentTimestamp := currentTime.Format("2006-01-02 15:04:05")
+	statementUpdateRecord, _ := database.Prepare("UPDATE sites SET name=?, url=?, description=?, date_edited=? WHERE id=?")
 	mutex.Lock()
-	statementUpdateRecord.Exec()
+	statementUpdateRecord.Exec(newSitename, newUrl, newDescription, currentTimestamp, siteID)
 	mutex.Unlock()
 
 	if err != nil {
@@ -65,10 +64,10 @@ func UpdateRecordRow(recordID int, newRecord string) (bool, error) {
 
 	// update record by ID
 	currentTime := time.Now()
-	updateStatement := fmt.Sprintf("UPDATE records SET records_data = %v, date_edited=%v WHERE id = %v", newRecord, currentTime.Format("2006-01-02 15:04:05"), recordID)
-	statementUpdateRecord, _ := database.Prepare(updateStatement)
+	currentTimestamp := currentTime.Format("2006-01-02 15:04:05")
+	statementUpdateRecord, _ := database.Prepare("UPDATE records SET records_data=?, date_edited=? WHERE id=?")
 	mutex.Lock()
-	statementUpdateRecord.Exec()
+	statementUpdateRecord.Exec(newRecord, currentTimestamp, recordID)
 	mutex.Unlock()
 
 	if err != nil {

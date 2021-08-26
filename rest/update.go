@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// UpdateWebsite function to trigger PUT request to update site details
+// UpdateWebsite function to trigger PATCH request to update site details
 func UpdateWebsite(siteID int, newSitename string, newUrl string, newDescription string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
@@ -72,7 +72,7 @@ func UpdateWebsite(siteID int, newSitename string, newUrl string, newDescription
 	return statusMap
 }
 
-// UpdateRecord function to trigger PUT request to update singular record
+// UpdateRecord function to trigger PATCH request to update singular record
 func UpdateRecord(recordID int, newRecord string) map[string]FetchStatus {
 
 	statusMap := make(map[string]FetchStatus)
