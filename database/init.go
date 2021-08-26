@@ -30,7 +30,7 @@ func createDB(name string) (bool, error) {
 	}
 
 	// prepare statements to create tables
-	statementTableSites, err := database.Prepare("CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING UNIQUE NOT NULL, url STRING NOT NULL, description STRING);")
+	statementTableSites, err := database.Prepare("CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING UNIQUE NOT NULL, url STRING NOT NULL, description STRING, date_edited DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP));")
 	if err != nil {
 		LOGS.ErrorLogger.Fatalln(err)
 	}
@@ -38,7 +38,7 @@ func createDB(name string) (bool, error) {
 	statementTableSites.Exec()
 	mutex.Unlock()
 
-	statementTableRecords, err := database.Prepare("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY UNIQUE NOT NULL, site_id INTEGER NOT NULL CONSTRAINT cx_results_site_id REFERENCES sites (id) ON DELETE CASCADE ON UPDATE CASCADE, records_data STRING NOT NULL, date_fetched DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP), date_edited  DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP));")
+	statementTableRecords, err := database.Prepare("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY UNIQUE NOT NULL, site_id INTEGER NOT NULL CONSTRAINT cx_results_site_id REFERENCES sites (id) ON DELETE CASCADE ON UPDATE CASCADE, records_data STRING NOT NULL, date_fetched DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP), date_edited DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP));")
 	if err != nil {
 		LOGS.ErrorLogger.Fatalln(err)
 	}
